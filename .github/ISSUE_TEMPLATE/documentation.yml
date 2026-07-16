@@ -1,0 +1,69 @@
+name: 📚 Documentation Update
+description: Report missing, incorrect, or unclear documentation
+title: "[DOCS] "
+labels: ["documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template to request changes to the project documentation under `docs/`, the `README`, or inline code comments.
+
+  - type: input
+    id: page
+    attributes:
+      label: File or Section
+      description: Which file or section needs updating? Link to it if possible.
+      placeholder: "e.g. docs/deployment.md — Managed MySQL TLS Configuration"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type of Issue
+      options:
+        - Missing information
+        - Incorrect information
+        - Unclear / confusing wording
+        - Outdated content
+        - Broken link
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description of the Problem
+      description: What is missing, incorrect, or unclear in the current documentation?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed
+    attributes:
+      label: Proposed Content
+      description: Draft of the new content, or specific details on what needs to be added or corrected.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: audience
+    attributes:
+      label: Target Audience
+      description: Who is this documentation for?
+      options:
+        - Developers / Contributors
+        - Operators / DevOps
+        - End Users (Patients, Doctors, Admins)
+        - All
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Any other context, related issues, or references.
+    validations:
+      required: false

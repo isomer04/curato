@@ -1,0 +1,136 @@
+<!--
+  Navbar / Sidebar Component Template
+
+  Dual-mode rendering:
+  - Authenticated users: collapsible sidebar (desktop fixed left, mobile drawer)
+  - Guest users: standard horizontal top navigation bar
+-->
+@if (authService.isAuthenticated()) {
+
+  <!-- ===== SIDEBAR (Desktop) & DRAWER (Mobile) ===== -->
+  <aside class="sidebar" [class.sidebar--open]="!isMenuCollapsed()" aria-label="Main navigation">
+
+    <!-- Brand Logo -->
+    <div class="sidebar__brand">
+      <a routerLink="/" class="sidebar__logo" (click)="closeMenu()">
+        <i class="bi bi-heart-pulse"></i>
+        <span>Curato</span>
+      </a>
+    </div>
+
+    <!-- Navigation Items -->
+    <nav class="sidebar__nav">
+      @for (item of currentNavItems; track item.path) {
+        <a
+          class="sidebar__item"
+          [routerLink]="item.path"
+          routerLinkActive="sidebar__item--active"
+          [routerLinkActiveOptions]="{ exact: false }"
+          (click)="closeMenu()"
+        >
+          <i class="bi sidebar__item-icon" [class]="item.icon"></i>
+          <span>{{ item.label }}</span>
+          @if (item.label === 'Messages' && messageService.unreadCount() > 0) {
+            <span class="sidebar__badge">{{ messageService.unreadCount() }}</span>
+          }
+        </a>
+      }
+    </nav>
+
+    <!-- User Profile Footer -->
+    <div class="sidebar__footer">
+      <div class="dropdown">
+        <button
+          class="sidebar__user dropdown-toggle"
+          type="button"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+          aria-label="User menu"
+        >
+          <span class="sidebar__avatar">{{ userInitials }}</span>
+          <div class="sidebar__user-info">
+            <span class="sidebar__user-name">{{ displayName }}</span>
+            <span class="sidebar__user-role">{{ currentRole }}</span>
+          </div>
+          <i class="bi bi-three-dots-vertical sidebar__user-dots"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end shadow">
+          <li>
+            <a class="dropdown-item" routerLink="/profile" (click)="closeMenu()">
+              <i class="bi bi-person me-2"></i>Profile
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" routerLink="/profile/mfa-setup" (click)="closeMenu()">
+              <i class="bi bi-shield-lock me-2"></i>Security (MFA)
+            </a>
+          </li>
+          <li><hr class="dropdown-divider"></li>
+          <li>
+            <button class="dropdown-item text-danger" (click)="logout()">
+              <i class="bi bi-box-arrow-right me-2"></i>Logout
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Mobile Top Bar (visible only on mobile) -->
+  <header class="mobile-header d-lg-none">
+    <a routerLink="/" class="mobile-header__logo" (click)="closeMenu()">
+      <i class="bi bi-heart-pulse"></i>
+      <span>Curato</span>
+    </a>
+    <button
+      class="mobile-header__toggle"
+      type="button"
+      (click)="toggleMenu()"
+      [attr.aria-label]="isMenuCollapsed() ? 'Open sidebar' : 'Close sidebar'"
+      [attr.aria-expanded]="!isMenuCollapsed()"
+    >
+      <i class="bi" [class]="isMenuCollapsed() ? 'bi-list' : 'bi-x-lg'"></i>
+    </button>
+  </header>
+
+  <!-- Mobile Overlay -->
+  @if (!isMenuCollapsed()) {
+    <div class="sidebar-overlay d-lg-none" (click)="closeMenu()" aria-hidden="true"></div>
+  }
+
+} @else {
+
+  <!-- ===== TOP BAR (Guest / Auth pages) ===== -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+    <div class="container">
+      <!-- Brand Logo and Name -->
+      <a class="navbar-brand d-flex align-items-center" routerLink="/">
+        <i class="bi bi-heart-pulse fs-4 me-2" style="color: var(--curato-primary)"></i>
+        <span class="fw-bold">Curato</span>
+      </a>
+
+      <!-- Mobile Menu Toggle -->
+      <button class="navbar-toggler border-0" type="button" (click)="toggleMenu()"
+        [attr.aria-expanded]="!isMenuCollapsed()" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <!-- Guest Navigation Links -->
+      <div class="collapse navbar-collapse" [class.show]="!isMenuCollapsed()">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/auth/login" routerLinkActive="active">
+              Login
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-primary ms-lg-2" routerLink="/auth/register">
+              Get Started
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+}

@@ -1,0 +1,188 @@
+/**
+ * Patient Dashboard Component Styles
+ */
+
+// ============================================================================
+// WELCOME CARD
+// ============================================================================
+
+.welcome-card {
+    background: var(--primary-gradient);
+    transition: box-shadow 0.25s ease;
+
+    &:hover {
+        box-shadow: 0 12px 40px rgba(79, 70, 229, 0.3) !important;
+    }
+}
+
+// ============================================================================
+// STAT CARDS
+// ============================================================================
+
+.stat-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-radius: var(--border-radius-md) !important;
+
+    &:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md) !important;
+    }
+}
+
+.stat-card__num {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 2.25rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--curato-text);
+    margin-bottom: 0.375rem;
+    letter-spacing: -0.03em;
+}
+
+.stat-card__label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--curato-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.icon-box {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--border-radius-sm);
+    flex-shrink: 0;
+}
+
+// ============================================================================
+// QUICK ACTION TILES
+// ============================================================================
+
+.quick-tile {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.625rem 0.75rem;
+    border-radius: var(--border-radius-sm);
+    border: none;
+    background: transparent;
+    color: var(--curato-text-secondary);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+    font-size: 0.875rem;
+    font-weight: 500;
+
+    &:hover {
+        background: var(--curato-bg);
+        color: var(--curato-primary);
+        text-decoration: none;
+    }
+}
+
+.quick-tile__icon {
+    width: 34px;
+    height: 34px;
+    border-radius: var(--border-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9375rem;
+    flex-shrink: 0;
+}
+
+.quick-tile__label {
+    flex: 1;
+    text-align: left;
+}
+
+.quick-tile__arrow {
+    color: var(--curato-text-muted);
+    font-size: 0.6875rem;
+    opacity: 0.7;
+}
+
+// ============================================================================
+// AVATAR STYLES
+// ============================================================================
+
+/**
+ * Avatar container for doctor display.
+ */
+.avatar {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/**
+ * Avatar text styling for displaying initials.
+ */
+.avatar-text {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+// ============================================================================
+// LIST ITEM STYLES
+// ============================================================================
+
+/**
+ * Appointment list item hover effect.
+ * Subtle background change on hover.
+ */
+.list-group-item {
+    transition: background-color 0.15s ease;
+
+    &:hover {
+        background-color: var(--bs-gray-50, #f8f9fa);
+    }
+}
+
+// ============================================================================
+// RESPONSIVE ADJUSTMENTS
+// ============================================================================
+
+/**
+ * Tablet and mobile adjustments.
+ */
+@media (max-width: 991.98px) {
+    .welcome-card {
+        .card-body {
+            text-align: center;
+        }
+
+        .btn-lg {
+            width: 100%;
+        }
+    }
+}
+
+/**
+ * Small mobile adjustments.
+ */
+@media (max-width: 575.98px) {
+    .stat-card {
+        .card-body {
+            flex-direction: column;
+            text-align: center;
+
+            .icon-box {
+                margin-bottom: 0.5rem;
+                margin-right: 0 !important;
+            }
+        }
+    }
+}

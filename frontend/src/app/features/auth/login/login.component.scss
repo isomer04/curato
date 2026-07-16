@@ -1,0 +1,281 @@
+/**
+ * Login Component Styles
+ *
+ * Split-panel layout: brand panel on left, form panel on right.
+ * Left panel hidden on mobile.
+ */
+
+// ============================================================================
+// PAGE SHELL
+// ============================================================================
+
+.login-page {
+    display: flex;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+// ============================================================================
+// LEFT BRAND PANEL
+// ============================================================================
+
+.login-brand {
+    flex: 0 0 42%;
+    background: var(--primary-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2.5rem;
+    overflow: hidden;
+    position: relative;
+
+    // Decorative ambient circles
+    &::before {
+        content: '';
+        position: absolute;
+        width: 520px;
+        height: 520px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.06);
+        top: -160px;
+        right: -160px;
+        pointer-events: none;
+    }
+
+    &::after {
+        content: '';
+        position: absolute;
+        width: 380px;
+        height: 380px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.04);
+        bottom: -100px;
+        left: -100px;
+        pointer-events: none;
+    }
+
+    @media (max-width: 900px) {
+        display: none;
+    }
+}
+
+.login-brand__inner {
+    position: relative;
+    z-index: 1;
+    max-width: 390px;
+}
+
+.login-brand__logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 3rem;
+    color: white;
+
+    i {
+        font-size: 2.25rem;
+    }
+
+    span {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 1.75rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+    }
+}
+
+.login-brand__headline {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 2.25rem;
+    font-weight: 800;
+    line-height: 1.2;
+    color: white;
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+}
+
+.login-brand__sub {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.95rem;
+    line-height: 1.7;
+    margin-bottom: 2.5rem;
+}
+
+.login-brand__features {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    li {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: rgba(255, 255, 255, 0.92);
+        font-size: 0.9rem;
+        font-weight: 500;
+
+        i {
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+    }
+}
+
+// ============================================================================
+// RIGHT FORM PANEL
+// ============================================================================
+
+.login-form-panel {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 2rem;
+    background: white;
+    overflow-y: auto;
+}
+
+.login-form-panel__inner {
+    width: 100%;
+    max-width: 420px;
+}
+
+.login-form-panel__header {
+    margin-bottom: 2rem;
+}
+
+.login-form-panel__icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+
+    i {
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+}
+
+.login-form-panel__title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: var(--curato-text);
+    margin-bottom: 0.375rem;
+    letter-spacing: -0.02em;
+}
+
+.login-form-panel__sub {
+    color: var(--curato-text-muted);
+    font-size: 0.9375rem;
+    margin-bottom: 0;
+}
+
+// ============================================================================
+// FORM ELEMENT STYLES
+// ============================================================================
+
+.input-group-text {
+    background-color: transparent;
+    border-right: none;
+}
+
+.input-group .form-control {
+    border-left: none;
+
+    &:focus {
+        box-shadow: none;
+    }
+}
+
+.input-group:focus-within {
+
+    .input-group-text,
+    .form-control,
+    .btn-outline-secondary {
+        border-color: var(--curato-primary);
+    }
+}
+
+.btn-outline-secondary {
+    border-left: none;
+
+    &:hover {
+        background-color: transparent;
+        color: var(--curato-primary);
+    }
+
+    &:focus {
+        box-shadow: none;
+    }
+}
+
+/**
+ * Invalid input state styling.
+ */
+.form-control.is-invalid {
+    border-color: var(--bs-danger);
+
+    &:focus {
+        box-shadow: 0 0 0 0.2rem rgba(var(--bs-danger-rgb), 0.25);
+    }
+}
+
+// ============================================================================
+// BUTTON STYLES
+// ============================================================================
+
+/**
+ * Primary submit button with gradient and hover effect.
+ */
+.btn-primary {
+    background: var(--primary-gradient);
+    border: none;
+    font-weight: 500;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+    }
+
+    &:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+}
+
+// ============================================================================
+// DEMO ACCOUNTS SECTION
+// ============================================================================
+
+/**
+ * Demo account buttons styling.
+ */
+.border-top {
+    border-color: var(--bs-gray-200) !important;
+}
+
+// ============================================================================
+// RESPONSIVE ADJUSTMENTS
+// ============================================================================
+
+/**
+ * Mobile-specific adjustments.
+ */
+@media (max-width: 575.98px) {
+    .login-container {
+        padding: 1rem;
+    }
+
+    .card-body {
+        padding: 1.5rem !important;
+    }
+
+    .brand-icon {
+        font-size: 2.5rem;
+    }
+}

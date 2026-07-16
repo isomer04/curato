@@ -1,0 +1,227 @@
+<div class="messaging-layout">
+
+    <!-- ======================== SIDEBAR ======================== -->
+    <aside class="msg-sidebar">
+        <!-- Sidebar Header -->
+        <div class="sidebar-header">
+            <div class="sidebar-title">
+                <i class="bi bi-chat-dots-fill"></i>
+                <span>Messages</span>
+                @if (messageService.unreadCount() > 0) {
+                <span class="unread-badge">{{ messageService.unreadCount() }}</span>
+                }
+            </div>
+            <button id="btn-new-conversation" class="btn-icon" title="New Conversation"
+                (click)="showNewConversation.set(!showNewConversation())">
+                <i class="bi bi-pencil-square"></i>
+            </button>
+        </div>
+
+        <!-- Search -->
+        <div class="sidebar-search">
+            <div class="search-wrapper">
+                <i class="bi bi-search search-icon"></i>
+                <input id="msg-search" type="text" class="search-input"
+                    [placeholder]="showNewConversation() ? 'Search users…' : 'Search conversations…'"
+                    [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)" />
+                @if (searchQuery()) {
+                <button class="search-clear" (click)="searchQuery.set('')">
+                    <i class="bi bi-x"></i>
+                </button>
+                }
+            </div>
+        </div>
+
+        <!-- New Conversation Panel -->
+        @if (showNewConversation()) {
+        <div class="panel-label">
+            <i class="bi bi-person-plus"></i> Start new conversation
+        </div>
+        <div class="conversation-list">
+            @if (messageService.isLoading()) {
+            <div class="loading-skeleton">
+                @for (item of [1,2,3,4]; track item) {
+                <div class="skeleton-item">
+                    <div class="skeleton-avatar"></div>
+                    <div class="skeleton-text">
+                        <div class="skeleton-line short"></div>
+                        <div class="skeleton-line"></div>
+                    </div>
+                </div>
+                }
+            </div>
+            } @else {
+            @for (user of filteredUsers(); track trackByUser($index, user)) {
+            <button id="btn-user-{{ user.id }}" class="conversation-item" (click)="startNewConversation(user)">
+                <div class="avatar-circle" [attr.data-initials]="getInitials(user.firstName, user.lastName)">
+                    {{ getInitials(user.firstName, user.lastName) }}
+                </div>
+                <div class="conversation-info">
+                    <div class="conv-top-row">
+                        <span class="conv-name">{{ user.firstName }} {{ user.lastName }}</span>
+                        <span class="role-badge {{ getRoleBadgeClass(user.role) }}">
+                            {{ getRoleLabel(user.role) }}
+                        </span>
+                    </div>
+                    <span class="conv-preview">{{ user.email }}</span>
+                </div>
+            </button>
+            }
+            @if (filteredUsers().length === 0) {
+            <div class="empty-list">No users found</div>
+            }
+            }
+        </div>
+        }
+
+        <!-- Conversation List (Inbox) -->
+        @if (!showNewConversation()) {
+        <div class="conversation-list">
+            @if (messageService.isLoading() && filteredConversations().length === 0) {
+            <div class="loading-skeleton">
+                @for (item of [1,2,3,4,5]; track item) {
+                <div class="skeleton-item">
+                    <div class="skeleton-avatar"></div>
+                    <div class="skeleton-text">
+                        <div class="skeleton-line short"></div>
+                        <div class="skeleton-line"></div>
+                    </div>
+                </div>
+                }
+            </div>
+            } @else {
+            @for (conv of filteredConversations(); track trackByConversation($index, conv)) {
+            <button id="btn-conv-{{ conv.userId }}" class="conversation-item"
+                [class.active]="messageService.activePartner() === conv.userId" [class.unread]="conv.unreadCount > 0"
+                (click)="openConversation(conv.userId)">
+                <div class="avatar-circle">
+                    {{ getInitials(conv.firstName, conv.lastName) }}
+                </div>
+                <div class="conversation-info">
+                    <div class="conv-top-row">
+                        <span class="conv-name">{{ conv.firstName }} {{ conv.lastName }}</span>
+                        <span class="conv-time">{{ formatTime(conv.lastMessageAt) }}</span>
+                    </div>
+                    <div class="conv-bottom-row">
+                        <span class="conv-preview">{{ conv.lastMessage }}</span>
+                        @if (conv.unreadCount > 0) {
+                        <span class="unread-dot">{{ conv.unreadCount }}</span>
+                        }
+                    </div>
+                </div>
+            </button>
+            }
+            @if (filteredConversations().length === 0) {
+            <div class="empty-list">
+                <i class="bi bi-chat-dots"></i>
+                <p>No conversations yet.</p>
+                <button class="btn-start" (click)="showNewConversation.set(true)">
+                    <i class="bi bi-plus-lg"></i> Start a conversation
+                </button>
+            </div>
+            }
+            }
+        </div>
+        }
+    </aside>
+
+    <!-- ======================== CHAT AREA ======================== -->
+    <main class="msg-main">
+        @if (messageService.activePartner(); as partnerId) {
+        <!-- Chat Header -->
+        <div class="chat-header">
+            @if (activePartnerInfo(); as partner) {
+            <div class="chat-partner">
+                <div class="avatar-circle avatar-lg">
+                    {{ getInitials(partner.firstName, partner.lastName) }}
+                </div>
+                <div class="partner-info">
+                    <span class="partner-name">{{ partner.firstName }} {{ partner.lastName }}</span>
+                    <span class="role-badge {{ getRoleBadgeClass(partner.role) }}">
+                        {{ getRoleLabel(partner.role) }}
+                    </span>
+                </div>
+            </div>
+            } @else {
+            <!-- Handle case where partner isn't in conversations yet (new chat) -->
+            <div class="chat-partner">
+                <div class="avatar-circle avatar-lg">?</div>
+                <div class="partner-info">
+                    <span class="partner-name">New Conversation</span>
+                </div>
+            </div>
+            }
+        </div>
+
+        <!-- Messages Thread -->
+        <div class="messages-container" #messagesContainer>
+            @if (messageService.activeConversation().length === 0) {
+            <div class="empty-thread">
+                <div class="empty-thread-icon">
+                    <i class="bi bi-chat-heart"></i>
+                </div>
+                <p>No messages yet. Say hello! 👋</p>
+            </div>
+            }
+
+            @for (msg of messageService.activeConversation(); track trackByMessage($index, msg)) {
+            <div class="message-wrapper" [class.own-message]="isOwnMessage(msg)"
+                [class.other-message]="!isOwnMessage(msg)">
+                @if (!isOwnMessage(msg)) {
+                <div class="avatar-circle avatar-sm">
+                    {{ getInitials(msg.sender?.firstName ?? '', msg.sender?.lastName ?? '') }}
+                </div>
+                }
+                <div class="message-bubble-group">
+                    <div class="message-bubble">
+                        {{ msg.content }}
+                    </div>
+                    <div class="message-meta">
+                        <span class="msg-time">{{ formatTime(msg.createdAt) }}</span>
+                        @if (isOwnMessage(msg)) {
+                        <span class="msg-read-status">
+                            @if (msg.isRead) {
+                            <i class="bi bi-check2-all read"></i>
+                            } @else {
+                            <i class="bi bi-check2"></i>
+                            }
+                        </span>
+                        }
+                    </div>
+                </div>
+            </div>
+            }
+        </div>
+
+        <!-- Message Input Area -->
+        <div class="message-input-area">
+            <div class="input-wrapper">
+                <textarea #messageInput id="msg-input" class="message-textarea"
+                    placeholder="Type a message… (Enter to send, Shift+Enter for new line)" rows="1"
+                    [value]="messageText()" (input)="messageText.set($any($event.target).value)"
+                    (keydown)="handleKeydown($event)"></textarea>
+                <button id="btn-send-message" class="btn-send" [disabled]="!messageText().trim() || isSending()"
+                    (click)="sendMessage()">
+                    @if (isSending()) {
+                    <span class="spinner"></span>
+                    } @else {
+                    <i class="bi bi-send-fill"></i>
+                    }
+                </button>
+            </div>
+        </div>
+        } @else {
+        <!-- Empty State -->
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="bi bi-chat-dots-fill"></i>
+            </div>
+            <h3>Your Messages</h3>
+            <p>Send secure messages to your healthcare team.<br />Select a conversation or start a new one.</p>
+            <button id="btn-start-chat" class="btn-primary-action" (click)="showNewConversation.set(true)">
+                <i class="bi bi-plus-lg"></i> New Message
+            </button>
+        </div>
+        }
+    </main>
+</div>

@@ -1,0 +1,107 @@
+<div class="container py-4">
+  <!-- Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card welcome-card text-white rounded-4 border-0">
+        <div class="card-body p-4">
+          <h2 class="fw-bold mb-1">
+            <i class="bi bi-calendar-week me-2"></i>All Appointments
+          </h2>
+          <p class="mb-0 opacity-75">View and manage all appointments across the system.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="card border-0 shadow-sm rounded-3 mb-4">
+    <div class="card-body p-3">
+      <div class="row g-2 align-items-center">
+        <div class="col-md-4">
+          <select class="form-select" [(ngModel)]="statusFilter" (change)="onFilterChange()">
+            <option value="">All Statuses</option>
+            @for (s of statuses; track s) {
+            <option [value]="s">{{ s | titlecase }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-auto">
+          <span class="text-muted small">{{ total() }} total</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  @if (isLoading()) {
+  <div class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+  } @else if (errorMessage()) {
+  <div class="alert alert-danger">{{ errorMessage() }}</div>
+  } @else if (appointments().length === 0) {
+  <div class="text-center py-5 text-muted">
+    <i class="bi bi-calendar-x display-4 mb-3 d-block opacity-50"></i>
+    <p>No appointments found.</p>
+  </div>
+  } @else {
+  <div class="card border-0 shadow-sm rounded-3">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th class="px-4 py-3">Patient</th>
+            <th class="py-3">Doctor</th>
+            <th class="py-3">Date</th>
+            <th class="py-3">Reason</th>
+            <th class="py-3">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (appt of appointments(); track appt.id) {
+          <tr>
+            <td class="px-4 py-3">
+              @if (appt.patient?.user?.firstName) {
+              <div>{{ appt.patient?.user?.firstName }} {{ appt.patient?.user?.lastName }}</div>
+              <small class="text-muted">{{ appt.patient?.user?.email }}</small>
+              } @else {
+              <span class="text-muted">—</span>
+              }
+            </td>
+            <td class="py-3">
+              @if (appt.doctor?.user?.firstName) {
+              Dr. {{ appt.doctor?.user?.firstName }} {{ appt.doctor?.user?.lastName }}
+              } @else {
+              <span class="text-muted">—</span>
+              }
+            </td>
+            <td class="py-3">{{ appt.appointmentDate | date:'MMM d, y, h:mm a' }}</td>
+            <td class="py-3">{{ appt.reasonForVisit || '—' }}</td>
+            <td class="py-3">
+              <span class="badge rounded-pill px-3 py-2" [class]="statusClass(appt.status)">
+                {{ appt.status | titlecase }}
+              </span>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  @if (totalPages > 1) {
+  <div class="d-flex justify-content-between align-items-center mt-3">
+    <button class="btn btn-outline-secondary btn-sm" (click)="prevPage()" [disabled]="currentPage === 1">
+      <i class="bi bi-chevron-left"></i> Previous
+    </button>
+    <span class="text-muted small">Page {{ currentPage }} of {{ totalPages }}</span>
+    <button class="btn btn-outline-secondary btn-sm" (click)="nextPage()" [disabled]="currentPage === totalPages">
+      Next <i class="bi bi-chevron-right"></i>
+    </button>
+  </div>
+  }
+  }
+</div>

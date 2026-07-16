@@ -1,0 +1,104 @@
+<div class="container py-4">
+  <!-- Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card welcome-card text-white rounded-4 border-0">
+        <div class="card-body p-4">
+          <h2 class="fw-bold mb-1"><i class="bi bi-person-badge me-2"></i>Manage Doctors</h2>
+          <p class="mb-0 opacity-75">Review and approve pending doctor registrations.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="alert alert-danger alert-dismissible">
+      {{ errorMessage() }}
+      <button
+        type="button"
+        class="btn-close"
+        (click)="errorMessage.set('')"
+        aria-label="Close"
+      ></button>
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  } @else {
+    <div class="card border-0 shadow-sm rounded-3">
+      <div
+        class="card-header bg-transparent border-0 pt-4 px-4 d-flex justify-content-between align-items-center"
+      >
+        <h5 class="fw-bold mb-0">Pending Approvals</h5>
+        <span class="badge bg-warning-subtle text-warning fs-6">{{ total() }} pending</span>
+      </div>
+      <div class="card-body p-0">
+        @if (pendingDoctors().length === 0) {
+          <div class="text-center py-5 text-muted">
+            <i class="bi bi-check-circle display-4 mb-3 d-block text-success opacity-50"></i>
+            <p>No pending doctor approvals.</p>
+          </div>
+        } @else {
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th class="px-4 py-3">Doctor</th>
+                  <th class="py-3">Specialization</th>
+                  <th class="py-3">License</th>
+                  <th class="py-3 text-end pe-4">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (doctor of pendingDoctors(); track doctor.id) {
+                  <tr>
+                    <td class="px-4 py-3">
+                      @if (doctor.user) {
+                        <div class="fw-semibold">
+                          Dr. {{ doctor.user.firstName }} {{ doctor.user.lastName }}
+                        </div>
+                        <small class="text-muted">{{ doctor.user.email }}</small>
+                      } @else {
+                        <span class="text-muted">—</span>
+                      }
+                    </td>
+                    <td class="py-3">{{ doctor.specialization || '—' }}</td>
+                    <td class="py-3">
+                      <code>{{ doctor.licenseNumber || '—' }}</code>
+                    </td>
+                    <td class="py-3 text-end pe-4">
+                      <div class="d-flex flex-column flex-sm-row gap-2 justify-content-end">
+                        <button
+                          class="btn btn-success btn-sm"
+                          (click)="approve(doctor.id)"
+                          [disabled]="actionInProgress() === doctor.id"
+                        >
+                          @if (actionInProgress() === doctor.id) {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                          }
+                          Approve
+                        </button>
+                        <button
+                          class="btn btn-outline-danger btn-sm"
+                          (click)="reject(doctor.id)"
+                          [disabled]="actionInProgress() === doctor.id"
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

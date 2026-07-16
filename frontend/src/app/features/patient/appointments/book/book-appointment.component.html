@@ -1,0 +1,212 @@
+<!--
+  Book Appointment Template
+  
+  Multi-step booking wizard:
+  1. Select Doctor
+  2. Select Date
+  3. Select Time Slot
+  4. Provide Reason
+-->
+
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-header bg-transparent border-0 pt-4 px-4">
+          <h3 class="fw-bold mb-1">Book an Appointment</h3>
+          <p class="text-muted mb-0">Select a doctor and choose your preferred time slot</p>
+        </div>
+        <div class="card-body p-4">
+          <form [formGroup]="bookingForm" (ngSubmit)="onSubmit()">
+            <!-- Step 1: Select Doctor -->
+            <div class="mb-4">
+              <h5 class="fw-semibold mb-3">
+                <span class="badge bg-primary me-2">1</span>
+                Select Doctor
+              </h5>
+
+              <!-- Search and Filter -->
+              <div class="row g-3 mb-3">
+                <div class="col-md-8">
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Search doctors by name..."
+                    [ngModel]="searchTerm()"
+                    [ngModelOptions]="{ standalone: true }"
+                    (ngModelChange)="searchTerm.set($event)"
+                  />
+                </div>
+                <div class="col-md-4">
+                  <select
+                    class="form-select"
+                    [ngModel]="selectedSpecialization()"
+                    [ngModelOptions]="{ standalone: true }"
+                    (ngModelChange)="selectedSpecialization.set($event)"
+                  >
+                    <option value="">All Specializations</option>
+                    @for (spec of specializations; track spec) {
+                      <option [value]="spec">{{ spec }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <!-- Doctor Cards -->
+              @if (isLoadingDoctors()) {
+                <div class="text-center py-4">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading doctors...</span>
+                  </div>
+                </div>
+              } @else if (filteredDoctors().length === 0) {
+                <div class="text-center py-4">
+                  <i class="bi bi-person-x display-4 text-muted"></i>
+                  <p class="text-muted mt-2">No doctors found</p>
+                </div>
+              } @else {
+                <div class="row g-3">
+                  @for (doctor of filteredDoctors(); track doctor.id) {
+                    <div class="col-md-6">
+                      <div
+                        class="card h-100 cursor-pointer doctor-card"
+                        role="button"
+                        tabindex="0"
+                        [class.selected]="selectedDoctor()?.id === doctor.id"
+                        (click)="selectDoctor(doctor)"
+                        (keyup.enter)="selectDoctor(doctor)"
+                      >
+                        <div class="card-body">
+                          <div class="d-flex">
+                            <div class="avatar me-3">
+                              <span class="avatar-text bg-primary-subtle text-primary">
+                                {{ getDoctorInitials(doctor) }}
+                              </span>
+                            </div>
+                            <div class="flex-grow-1">
+                              <h6 class="fw-semibold mb-1">{{ getDoctorName(doctor) }}</h6>
+                              <p class="text-muted small mb-1">{{ doctor.specialization }}</p>
+                              <div class="d-flex align-items-center small">
+                                <i class="bi bi-star-fill text-warning me-1"></i>
+                                <span>{{ doctor.rating || 4.5 }}</span>
+                                <span class="mx-2">•</span>
+                                <span>{{ doctor.yearsOfExperience }} years</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+            @if (selectedDoctor()) {
+              <!-- Step 2: Select Date -->
+              <div class="mb-4">
+                <h5 class="fw-semibold mb-3">
+                  <span class="badge bg-primary me-2">2</span>
+                  Select Date
+                </h5>
+                <input
+                  type="date"
+                  class="form-control"
+                  formControlName="appointmentDate"
+                  [min]="minDate"
+                  [max]="maxDate"
+                  (change)="loadAvailableSlots()"
+                />
+              </div>
+
+              @if (bookingForm.get('appointmentDate')?.value) {
+                <!-- Step 3: Select Time Slot -->
+                <div class="mb-4">
+                  <h5 class="fw-semibold mb-3">
+                    <span class="badge bg-primary me-2">3</span>
+                    Select Time Slot
+                  </h5>
+
+                  @if (isLoadingSlots()) {
+                    <div class="text-center py-4">
+                      <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading slots...</span>
+                      </div>
+                    </div>
+                  } @else if (availableSlots().length === 0) {
+                    <div class="alert alert-warning">
+                      <i class="bi bi-exclamation-triangle me-2"></i>
+                      No available slots for this date. Please select another date.
+                    </div>
+                  } @else {
+                    <div class="d-flex flex-wrap gap-2">
+                      @for (slot of availableSlots(); track slot) {
+                        <button
+                          type="button"
+                          class="btn slot-btn"
+                          [class.btn-primary]="selectedSlot() === slot"
+                          [class.btn-outline-primary]="selectedSlot() !== slot"
+                          (click)="selectSlot(slot)"
+                        >
+                          {{ slot }}
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+
+              @if (selectedSlot()) {
+                <!-- Step 4: Reason for Visit -->
+                <div class="mb-4">
+                  <h5 class="fw-semibold mb-3">
+                    <span class="badge bg-primary me-2">4</span>
+                    Reason for Visit
+                  </h5>
+                  <textarea
+                    class="form-control"
+                    rows="4"
+                    formControlName="reasonForVisit"
+                    placeholder="Please describe your symptoms or reason for this visit (minimum {{
+                      minReasonLength
+                    }} characters)..."
+                  ></textarea>
+                  @if (
+                    hasError('reasonForVisit', 'required') ||
+                    hasError('reasonForVisit', 'minlength')
+                  ) {
+                    <small class="text-danger">
+                      Please provide a reason (minimum {{ minReasonLength }} characters)
+                    </small>
+                  }
+                </div>
+              }
+            }
+
+            <!-- Submit Button -->
+            <div class="d-flex justify-content-between pt-3 border-top">
+              <a routerLink="/patient/dashboard" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Cancel
+              </a>
+              <button
+                type="submit"
+                class="btn btn-primary"
+                [disabled]="
+                  bookingForm.invalid || !selectedDoctor() || !selectedSlot() || isSubmitting()
+                "
+              >
+                @if (isSubmitting()) {
+                  <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                  Booking...
+                } @else {
+                  <i class="bi bi-calendar-check me-2"></i>
+                  Confirm Booking
+                }
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{title}}</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f7fa;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+            padding: 32px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #ffffff;
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.85);
+            margin: 8px 0 0;
+            font-size: 14px;
+        }
+
+        .body {
+            padding: 32px;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .body h2 {
+            color: #0f766e;
+            font-size: 20px;
+            margin-top: 0;
+        }
+
+        .info-box {
+            background: #f0fdfa;
+            border-left: 4px solid #14b8a6;
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 20px 0;
+        }
+
+        .info-box p {
+            margin: 4px 0;
+            font-size: 14px;
+        }
+
+        .btn {
+            display: inline-block;
+            background: #0f766e;
+            color: #ffffff !important;
+            text-decoration: none;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-top: 16px;
+        }
+
+        .footer {
+            background: #f8fafc;
+            padding: 24px 32px;
+            text-align: center;
+            color: #64748b;
+            font-size: 12px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        ul li {
+            margin-bottom: 6px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Healthcare System</h1>
+            <p>Your health, our priority</p>
+        </div>
+        <div class="body">
+            {{{body}}}
+        </div>
+        <div class="footer">
+            <p>&copy; {{year}} Healthcare Appointment System. All rights reserved.</p>
+            <p>This is an automated message — please do not reply directly.</p>
+        </div>
+    </div>
+</body>
+
+</html>

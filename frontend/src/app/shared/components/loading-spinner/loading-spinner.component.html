@@ -1,0 +1,46 @@
+<!--
+  Loading Spinner Template
+  
+  Two display modes:
+  1. Overlay mode: Full-screen overlay with centered spinner
+  2. Inline mode: Simple spinner that flows with content
+  
+  Accessibility:
+  - Uses role="status" for screen readers
+  - Includes visually-hidden text
+  - aria-live for dynamic loading messages
+-->
+
+@if (overlay()) {
+<!-- Full-screen overlay mode -->
+<div class="spinner-overlay" role="status" aria-live="polite">
+    <div class="spinner-container">
+        <div
+            class="spinner-border text-primary"
+            [class]="sizeClass"
+            [style.width]="size() === 'large' ? '3rem' : null"
+            [style.height]="size() === 'large' ? '3rem' : null"
+            [style.border-width]="size() === 'large' ? '0.35em' : null">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        @if (message()) {
+        <p class="spinner-message mt-3 mb-0">{{ message() }}</p>
+        }
+    </div>
+</div>
+} @else {
+<!-- Inline mode -->
+<div class="spinner-inline d-flex flex-column align-items-center" role="status" aria-live="polite">
+    <div
+        class="spinner-border text-primary"
+        [class]="sizeClass"
+        [style.width]="size() === 'large' ? '3rem' : null"
+        [style.height]="size() === 'large' ? '3rem' : null"
+        [style.border-width]="size() === 'large' ? '0.35em' : null">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    @if (message()) {
+    <p class="spinner-message mt-2 mb-0 small text-muted">{{ message() }}</p>
+    }
+</div>
+}

@@ -1,0 +1,10 @@
+.form-check-input:checked {
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+}
+
+@media (max-width: 767.98px) {
+  .day-row {
+    padding-bottom: 1rem;
+  }
+}

@@ -1,0 +1,327 @@
+/**
+ * Navbar / Sidebar Component Styles
+ *
+ * Sidebar mode (authenticated): fixed left panel, 240px wide.
+ * Topbar mode (guest): standard Bootstrap sticky top bar.
+ */
+
+// ============================================================================
+// SIDEBAR — DESKTOP FIXED LAYOUT
+// ============================================================================
+
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 240px;
+  height: 100vh;
+  background: #ffffff;
+  border-right: 1px solid var(--curato-border);
+  display: flex;
+  flex-direction: column;
+  z-index: 200;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+  // Hidden off-screen on mobile by default; shown when .sidebar--open
+  @media (max-width: 991px) {
+    transform: translateX(-100%);
+    box-shadow: none;
+
+    &.sidebar--open {
+      transform: translateX(0);
+      box-shadow: var(--shadow-xl);
+    }
+  }
+}
+
+// ============================================================================
+// SIDEBAR — BRAND
+// ============================================================================
+
+.sidebar__brand {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--curato-border);
+  flex-shrink: 0;
+}
+
+.sidebar__logo {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  text-decoration: none;
+  color: var(--curato-text);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  font-size: 1.125rem;
+  letter-spacing: -0.02em;
+
+  i {
+    font-size: 1.5rem;
+    color: var(--curato-primary);
+  }
+
+  &:hover {
+    color: var(--curato-text);
+  }
+}
+
+// ============================================================================
+// SIDEBAR — NAV ITEMS
+// ============================================================================
+
+.sidebar__nav {
+  flex: 1;
+  padding: 0.75rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.sidebar__item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.875rem;
+  border-radius: var(--border-radius-sm);
+  color: var(--curato-text-secondary);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+
+  &:hover {
+    background: var(--curato-primary-light);
+    color: var(--curato-primary);
+    text-decoration: none;
+  }
+
+  &--active {
+    background: var(--curato-primary-light);
+    color: var(--curato-primary);
+    font-weight: 600;
+  }
+}
+
+.sidebar__item-icon {
+  font-size: 1.0625rem;
+  width: 18px;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.sidebar__badge {
+  margin-left: auto;
+  background: var(--curato-primary);
+  color: white;
+  border-radius: 9999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.1rem 0.45rem;
+  min-width: 18px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+// ============================================================================
+// SIDEBAR — USER FOOTER
+// ============================================================================
+
+.sidebar__footer {
+  padding: 0.75rem;
+  border-top: 1px solid var(--curato-border);
+  flex-shrink: 0;
+}
+
+.sidebar__user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--border-radius-sm);
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover,
+  &[aria-expanded='true'] {
+    background: var(--curato-bg);
+  }
+
+  // Remove Bootstrap dropdown-toggle caret from default location
+  &::after {
+    display: none;
+  }
+}
+
+.sidebar__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--primary-gradient);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+}
+
+.sidebar__user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.sidebar__user-name {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--curato-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.3;
+}
+
+.sidebar__user-role {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--curato-text-muted);
+  text-transform: capitalize;
+}
+
+.sidebar__user-dots {
+  color: var(--curato-text-muted);
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+// ============================================================================
+// MOBILE TOP BAR
+// ============================================================================
+
+.mobile-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 150;
+  background: white;
+  border-bottom: 1px solid var(--curato-border);
+  padding: 0.875rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-sm);
+}
+
+.mobile-header__logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: var(--curato-text);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: -0.02em;
+
+  i {
+    font-size: 1.25rem;
+    color: var(--curato-primary);
+  }
+
+  &:hover {
+    color: var(--curato-text);
+  }
+}
+
+.mobile-header__toggle {
+  background: none;
+  border: none;
+  padding: 0.375rem;
+  color: var(--curato-text-secondary);
+  font-size: 1.375rem;
+  cursor: pointer;
+  border-radius: var(--border-radius-sm);
+  line-height: 1;
+
+  &:hover {
+    background: var(--curato-bg);
+    color: var(--curato-text);
+  }
+}
+
+// ============================================================================
+// MOBILE OVERLAY
+// ============================================================================
+
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(16, 24, 40, 0.4);
+  z-index: 199;
+  backdrop-filter: blur(2px);
+}
+
+// ============================================================================
+// GUEST TOP BAR (Bootstrap nav — kept from original)
+// ============================================================================
+
+.navbar-brand {
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.nav-link.active {
+  color: var(--curato-primary);
+  font-weight: 500;
+}
+
+.nav-link:hover:not(.active) {
+  color: var(--curato-primary);
+}
+
+// ============================================================================
+// DROPDOWN
+// ============================================================================
+
+.dropdown-menu {
+  margin-top: 0.5rem;
+  border: 1px solid var(--curato-border);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-lg);
+  animation: fadeIn 0.15s ease-out;
+}
+
+.dropdown-item {
+  padding: 0.5625rem 1rem;
+  font-size: 0.875rem;
+  transition: background-color 0.1s ease;
+
+  &:hover {
+    background-color: var(--curato-primary-light);
+    color: var(--curato-primary);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-0.375rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

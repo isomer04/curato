@@ -1,0 +1,211 @@
+<!--
+  Patient Dashboard Template
+  
+  Layout structure:
+  1. Welcome banner with greeting and CTA button
+  2. Statistics cards row (4 cards showing appointment counts)
+  3. Two-column layout:
+     - Left: Quick actions panel
+     - Right: Upcoming appointments list
+  
+  Uses Bootstrap 5 grid system for responsive layout.
+  Angular control flow (@if, @for) for conditional rendering.
+-->
+
+<div class="container py-4">
+  <!-- Welcome Banner Section -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card welcome-card text-white rounded-4 border-0">
+        <div class="card-body p-4">
+          <div class="row align-items-center">
+            <div class="col-lg-8">
+              <h2 class="fw-bold mb-2">
+                Welcome back, {{ authService.currentUser()?.firstName }}! 👋
+              </h2>
+              <p class="mb-3 opacity-75">
+                Manage your appointments and stay on top of your health.
+              </p>
+              <a routerLink="/patient/book" class="btn btn-light btn-lg">
+                <i class="bi bi-calendar-plus me-2"></i>
+                Book New Appointment
+              </a>
+            </div>
+            <div class="col-lg-4 text-center d-none d-lg-block">
+              <i class="bi bi-heart-pulse display-1 opacity-50"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="row">
+      <div class="col-12 text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading dashboard...</span>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <!-- Statistics Cards Row -->
+    <div class="row mb-4 g-3">
+      <!-- Upcoming Appointments Card -->
+      <div class="col-6 col-md-3">
+        <div class="card h-100 border-0 shadow-sm stat-card">
+          <div class="card-body p-4">
+            <div class="icon-box bg-primary-subtle text-primary rounded-3 mb-3">
+              <i class="bi bi-calendar-check fs-5"></i>
+            </div>
+            <div class="stat-card__num">{{ stats().upcoming }}</div>
+            <div class="stat-card__label">Upcoming</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Completed Appointments Card -->
+      <div class="col-6 col-md-3">
+        <div class="card h-100 border-0 shadow-sm stat-card">
+          <div class="card-body p-4">
+            <div class="icon-box bg-success-subtle text-success rounded-3 mb-3">
+              <i class="bi bi-check-circle fs-5"></i>
+            </div>
+            <div class="stat-card__num">{{ stats().completed }}</div>
+            <div class="stat-card__label">Completed</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pending Appointments Card -->
+      <div class="col-6 col-md-3">
+        <div class="card h-100 border-0 shadow-sm stat-card">
+          <div class="card-body p-4">
+            <div class="icon-box bg-warning-subtle text-warning rounded-3 mb-3">
+              <i class="bi bi-hourglass-split fs-5"></i>
+            </div>
+            <div class="stat-card__num">{{ stats().pending }}</div>
+            <div class="stat-card__label">Pending</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cancelled Appointments Card -->
+      <div class="col-6 col-md-3">
+        <div class="card h-100 border-0 shadow-sm stat-card">
+          <div class="card-body p-4">
+            <div class="icon-box bg-danger-subtle text-danger rounded-3 mb-3">
+              <i class="bi bi-x-circle fs-5"></i>
+            </div>
+            <div class="stat-card__num">{{ stats().cancelled }}</div>
+            <div class="stat-card__label">Cancelled</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions & Upcoming Appointments Row -->
+    <div class="row g-4">
+      <!-- Quick Actions Panel -->
+      <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-3 h-100">
+          <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
+            <h5 class="fw-bold mb-0">Quick Actions</h5>
+          </div>
+          <div class="card-body p-3">
+            <div class="d-flex flex-column gap-1">
+              <button (click)="downloadRecords()" class="quick-tile w-100">
+                <span class="quick-tile__icon bg-success-subtle text-success">
+                  <i class="bi bi-file-earmark-spreadsheet"></i>
+                </span>
+                <span class="quick-tile__label">Download Records (CSV)</span>
+                <i class="bi bi-chevron-right quick-tile__arrow"></i>
+              </button>
+              <button (click)="downloadRecordsPdf()" class="quick-tile w-100">
+                <span class="quick-tile__icon bg-danger-subtle text-danger">
+                  <i class="bi bi-file-earmark-pdf"></i>
+                </span>
+                <span class="quick-tile__label">Download Records (PDF)</span>
+                <i class="bi bi-chevron-right quick-tile__arrow"></i>
+              </button>
+              @for (action of quickActions; track action.route) {
+                <a [routerLink]="action.route" class="quick-tile">
+                  <span class="quick-tile__icon bg-primary-subtle text-primary">
+                    <i class="bi" [class]="action.icon"></i>
+                  </span>
+                  <span class="quick-tile__label">{{ action.label }}</span>
+                  <i class="bi bi-chevron-right quick-tile__arrow"></i>
+                </a>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upcoming Appointments Panel -->
+      <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-3">
+          <div
+            class="card-header bg-transparent border-0 pt-4 px-4 d-flex justify-content-between align-items-center"
+          >
+            <h5 class="fw-bold mb-0">Upcoming Appointments</h5>
+            <a routerLink="/patient/appointments" class="btn btn-sm btn-link text-decoration-none">
+              View All <i class="bi bi-arrow-right"></i>
+            </a>
+          </div>
+          <div class="card-body p-4">
+            @if (displayedAppointments().length === 0) {
+              <!-- Empty State -->
+              <div class="text-center py-4">
+                <i class="bi bi-calendar-x display-4 text-muted"></i>
+                <p class="text-muted mt-3">No upcoming appointments</p>
+                <a routerLink="/patient/book" class="btn btn-primary">
+                  Book Your First Appointment
+                </a>
+              </div>
+            } @else {
+              <!-- Appointments List -->
+              <div class="list-group list-group-flush">
+                @for (appointment of displayedAppointments(); track appointment.id) {
+                  <div class="list-group-item px-0 py-3 border-0 border-bottom">
+                    <div class="d-flex justify-content-between align-items-start">
+                      <div class="d-flex">
+                        <!-- Doctor Avatar -->
+                        <div class="avatar me-3">
+                          <span class="avatar-text bg-primary-subtle text-primary">
+                            {{ getDoctorInitials(appointment) }}
+                          </span>
+                        </div>
+                        <!-- Appointment Details -->
+                        <div>
+                          <h6 class="mb-1 fw-semibold">
+                            {{ getDoctorName(appointment) }}
+                          </h6>
+                          <p class="text-muted mb-1 small">
+                            {{ appointment.doctor?.specialization }}
+                          </p>
+                          <p class="mb-0 small">
+                            <i class="bi bi-calendar3 me-1"></i>
+                            {{ appointment.appointmentDate | date: 'MMM d, yyyy' }}
+                            <span class="mx-2">•</span>
+                            <i class="bi bi-clock me-1"></i>
+                            {{ appointment.startTime }}
+                          </p>
+                        </div>
+                      </div>
+                      <!-- Status Badge -->
+                      <span class="badge" [class]="appointment.status | statusBadge">
+                        {{ appointment.status | titlecase }}
+                      </span>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

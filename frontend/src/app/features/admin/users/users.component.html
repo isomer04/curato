@@ -1,0 +1,309 @@
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+    <h2 class="fw-bold mb-0">User Management</h2>
+    <button class="btn btn-primary" (click)="showAddModal.set(true)">
+      <i class="bi bi-person-plus me-2"></i> Add User
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="card border-0 shadow-sm rounded-3 mb-4">
+    <div class="card-body">
+      <div class="row g-3 align-items-end">
+        <div class="col-12 col-md-4">
+          <label for="searchInput" class="form-label small text-muted">Search</label>
+          <input
+            type="text"
+            id="searchInput"
+            class="form-control"
+            placeholder="Search by name or email..."
+            [(ngModel)]="searchTerm"
+            (input)="searchUsers()"
+          />
+        </div>
+        <div class="col-6 col-md-2">
+          <label for="roleSelect" class="form-label small text-muted">Role</label>
+          <select
+            id="roleSelect"
+            class="form-select"
+            [(ngModel)]="selectedRole"
+            (change)="loadUsers()"
+          >
+            <option value="">All Roles</option>
+            <option value="patient">Patient</option>
+            <option value="doctor">Doctor</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <div class="col-6 col-md-2">
+          <label for="statusSelect" class="form-label small text-muted">Status</label>
+          <select
+            id="statusSelect"
+            class="form-select"
+            [(ngModel)]="selectedStatus"
+            (change)="loadUsers()"
+          >
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+        <div class="col-6 col-md-2">
+          <button class="btn btn-outline-secondary w-100" (click)="resetFilters()">
+            <i class="bi bi-x-lg me-2"></i>Clear
+          </button>
+        </div>
+        <div class="col-6 col-md-2">
+          <button class="btn btn-outline-primary w-100" (click)="exportUsers()">
+            <i class="bi bi-download me-2"></i>Export
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Users Table -->
+  <div class="card border-0 shadow-sm rounded-3">
+    <div class="card-body p-0">
+      @if (isLoading()) {
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status"></div>
+        </div>
+      } @else if (users().length === 0) {
+        <div class="text-center py-5">
+          <i class="bi bi-people display-3 text-muted"></i>
+          <h5 class="text-muted mt-3">No users found</h5>
+        </div>
+      } @else {
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>User</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Last Login</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (user of users(); track user.id) {
+                <tr>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <div class="avatar-sm me-3">
+                        <span class="avatar-text" [class]="getRoleColorClass(user.role)">
+                          {{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}
+                        </span>
+                      </div>
+                      <div>
+                        <div class="fw-semibold">{{ user.firstName }} {{ user.lastName }}</div>
+                        <small class="text-muted">{{ user.email }}</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="badge" [class]="getRoleBadgeClass(user.role)">
+                      {{ user.role | titlecase }}
+                    </span>
+                  </td>
+                  <td>
+                    <span
+                      class="badge"
+                      [class.bg-success]="user.isActive"
+                      [class.bg-danger]="!user.isActive"
+                    >
+                      {{ user.isActive ? 'Active' : 'Inactive' }}
+                    </span>
+                  </td>
+                  <td class="text-muted">
+                    {{ user.lastLoginAt | date: 'MMM d, yyyy' }}
+                  </td>
+                  <td class="text-muted">
+                    {{ user.createdAt | date: 'MMM d, yyyy' }}
+                  </td>
+                  <td>
+                    <div class="btn-group btn-group-sm">
+                      <button class="btn btn-outline-primary" title="Edit" (click)="editUser(user)">
+                        <i class="bi bi-pencil"></i>
+                      </button>
+                      @if (user.isActive) {
+                        <button
+                          class="btn btn-outline-warning"
+                          title="Deactivate"
+                          (click)="toggleUserStatus(user)"
+                        >
+                          <i class="bi bi-person-slash"></i>
+                        </button>
+                      } @else {
+                        <button
+                          class="btn btn-outline-success"
+                          title="Activate"
+                          (click)="toggleUserStatus(user)"
+                        >
+                          <i class="bi bi-person-check"></i>
+                        </button>
+                      }
+                      <button
+                        class="btn btn-outline-danger"
+                        title="Delete"
+                        (click)="confirmDelete(user)"
+                      >
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div
+          class="card-footer bg-transparent border-0 d-flex justify-content-between align-items-center flex-wrap gap-2 py-3"
+        >
+          <span class="text-muted small">
+            Showing {{ users().length }} of {{ totalUsers() }} users
+          </span>
+          <nav>
+            <ul class="pagination pagination-sm mb-0">
+              <li class="page-item" [class.disabled]="currentPage === 1">
+                <button class="page-link" (click)="changePage(currentPage - 1)">Previous</button>
+              </li>
+              <li class="page-item active">
+                <span class="page-link">{{ currentPage }}</span>
+              </li>
+              <li class="page-item">
+                <button class="page-link" (click)="changePage(currentPage + 1)">Next</button>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit User Modal -->
+@if (showAddModal() || showEditModal()) {
+  <div
+    class="modal fade show d-block"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="userFormModalTitle"
+    (keydown.escape)="closeModals()"
+    style="background: rgba(0, 0, 0, 0.5)"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="userFormModalTitle">
+            {{ showEditModal() ? 'Edit User' : 'Add New User' }}
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            (click)="closeModals()"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-6">
+              <label class="form-label" for="firstName">First Name</label>
+              <input
+                type="text"
+                id="firstName"
+                class="form-control"
+                [(ngModel)]="editingUser.firstName"
+              />
+            </div>
+            <div class="col-6">
+              <label class="form-label" for="lastName">Last Name</label>
+              <input
+                type="text"
+                id="lastName"
+                class="form-control"
+                [(ngModel)]="editingUser.lastName"
+              />
+            </div>
+            <div class="col-12">
+              <label class="form-label" for="email">Email</label>
+              <input type="email" id="email" class="form-control" [(ngModel)]="editingUser.email" />
+            </div>
+            <div class="col-12">
+              <label class="form-label" for="role">Role</label>
+              <select id="role" class="form-select" [(ngModel)]="editingUser.role">
+                <option value="patient">Patient</option>
+                <option value="doctor">Doctor</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            @if (!showEditModal()) {
+              <div class="col-12">
+                <label class="form-label" for="password">Password</label>
+                <input
+                  type="password"
+                  id="password"
+                  class="form-control"
+                  [(ngModel)]="editingUser.password"
+                  placeholder="Minimum 8 characters"
+                />
+              </div>
+            }
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeModals()">Cancel</button>
+          <button type="button" class="btn btn-primary" (click)="saveUser()">
+            {{ showEditModal() ? 'Update' : 'Create' }} User
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Delete Confirmation Modal -->
+@if (showDeleteModal()) {
+  <div
+    class="modal fade show d-block"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="deleteUserModalTitle"
+    (keydown.escape)="closeModals()"
+    style="background: rgba(0, 0, 0, 0.5)"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title text-danger" id="deleteUserModalTitle">
+            <i class="bi bi-exclamation-triangle me-2"></i>Confirm Delete
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            (click)="closeModals()"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <p>
+            Are you sure you want to delete user
+            <strong>{{ editingUser.firstName }} {{ editingUser.lastName }}</strong
+            >?
+          </p>
+          <p class="text-muted small">This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeModals()">Cancel</button>
+          <button type="button" class="btn btn-danger" (click)="deleteUser()">Delete User</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

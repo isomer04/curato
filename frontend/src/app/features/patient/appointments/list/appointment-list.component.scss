@@ -1,0 +1,155 @@
+/**
+ * Appointment List Component Styles
+ *
+ * Card-row layout replacing legacy Bootstrap table.
+ */
+
+// ============================================================================
+// APPOINTMENT CARD ROWS
+// ============================================================================
+
+.apt-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.apt-row {
+    display: grid;
+    grid-template-columns: 200px 160px 1fr auto;
+    align-items: center;
+    gap: 1rem 1.5rem;
+    padding: 1.125rem 1.5rem;
+    border-bottom: 1px solid var(--curato-border);
+    transition: background 0.15s ease;
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    &:hover {
+        background: var(--curato-bg);
+    }
+
+    @media (max-width: 900px) {
+        grid-template-columns: 1fr auto;
+        grid-template-rows: auto auto auto;
+    }
+
+    @media (max-width: 575px) {
+        padding: 1rem;
+        gap: 0.75rem;
+    }
+}
+
+// ============================================================================
+// DOCTOR COLUMN
+// ============================================================================
+
+.apt-row__doctor {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.apt-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--curato-primary-light);
+    color: var(--curato-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    letter-spacing: 0.02em;
+}
+
+.apt-row__doc-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.apt-row__doc-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--curato-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.apt-row__specialty {
+    font-size: 0.75rem;
+    color: var(--curato-primary);
+    font-weight: 500;
+}
+
+// ============================================================================
+// DATETIME COLUMN
+// ============================================================================
+
+.apt-row__datetime {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+
+    @media (max-width: 900px) {
+        grid-column: 1 / -1;
+    }
+}
+
+.apt-row__date {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--curato-text);
+}
+
+.apt-row__time {
+    font-size: 0.8125rem;
+    color: var(--curato-text-muted);
+}
+
+// ============================================================================
+// REASON COLUMN
+// ============================================================================
+
+.apt-row__reason {
+    font-size: 0.875rem;
+    color: var(--curato-text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    @media (max-width: 900px) {
+        display: none;
+    }
+}
+
+// ============================================================================
+// STATUS + ACTIONS
+// ============================================================================
+
+.apt-row__footer {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.apt-row__actions {
+    display: flex;
+    gap: 0.375rem;
+}
+
+// ============================================================================
+// RESPONSIVE — BUTTON GROUPS
+// ============================================================================
+
+@media (max-width: 767.98px) {
+    .apt-row__actions {
+        flex-wrap: wrap;
+    }
+}

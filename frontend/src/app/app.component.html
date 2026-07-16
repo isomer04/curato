@@ -1,0 +1,49 @@
+<!--
+  App Component Template
+  
+  Main application layout with:
+  - Navbar at the top (sticky)
+  - Main content area with router outlet
+  - Footer at the bottom
+  - Toast notification container (fixed position)
+-->
+
+@if (authService.isAuthenticated()) {
+  <!-- Authenticated: sidebar + content shell -->
+  <div class="app-shell">
+    <app-navbar></app-navbar>
+    <div class="app-shell__content">
+      <main class="main-content">
+        <router-outlet></router-outlet>
+      </main>
+    </div>
+  </div>
+} @else {
+  <!-- Guest: topbar + content + footer -->
+  <app-navbar></app-navbar>
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+  <app-footer></app-footer>
+}
+
+<!-- Toast Notification Container -->
+<div class="toast-container" aria-live="polite" aria-atomic="true">
+  @for (toast of notificationService.toasts(); track toast.id) {
+    <div class="toast show" [class]="getToastClass(toast.type)" role="alert">
+      <div class="toast-header">
+        <i class="bi me-2" [class]="getToastIcon(toast.type)"></i>
+        <strong class="me-auto">{{ toast.title }}</strong>
+        <button
+          type="button"
+          class="btn-close"
+          (click)="dismissToast(toast)"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="toast-body">
+        {{ toast.message }}
+      </div>
+    </div>
+  }
+</div>

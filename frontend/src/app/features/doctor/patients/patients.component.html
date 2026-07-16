@@ -1,0 +1,109 @@
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold mb-0">My Patients</h2>
+    <span class="badge bg-primary-subtle text-primary fs-6 px-3 py-2">
+      {{ filteredPatients().length }} patient{{ filteredPatients().length !== 1 ? 's' : '' }}
+    </span>
+  </div>
+
+  <!-- Search -->
+  <div class="card border-0 shadow-sm rounded-3 mb-4">
+    <div class="card-body">
+      <div class="input-group">
+        <span class="input-group-text bg-white border-end-0">
+          <i class="bi bi-search text-muted"></i>
+        </span>
+        <input
+          type="text"
+          class="form-control border-start-0 ps-0"
+          placeholder="Search by name or email…"
+          [value]="searchQuery()"
+          (input)="searchQuery.set($any($event.target).value)"
+          aria-label="Search patients"
+        />
+        @if (searchQuery()) {
+          <button class="btn btn-outline-secondary" type="button" (click)="searchQuery.set('')" aria-label="Clear search">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Patient List -->
+  <div class="card border-0 shadow-sm rounded-3">
+    <div class="card-body p-0">
+      @if (isLoading()) {
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading…</span>
+          </div>
+        </div>
+      } @else if (filteredPatients().length === 0) {
+        <div class="text-center py-5">
+          <i class="bi bi-people display-3 text-muted"></i>
+          <h5 class="text-muted mt-3">
+            @if (searchQuery()) {
+              No patients match your search
+            } @else {
+              No patients yet
+            }
+          </h5>
+          <p class="text-muted small">Patients appear here once they have an appointment with you.</p>
+        </div>
+      } @else {
+        <div class="table-responsive">
+          <table class="table table-hover mb-0" aria-label="Patients list">
+            <thead class="table-light">
+              <tr>
+                <th scope="col">Patient</th>
+                <th scope="col">Gender</th>
+                <th scope="col">Blood Group</th>
+                <th scope="col">Emergency Contact</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (patient of filteredPatients(); track patient.id) {
+                <tr>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <div class="avatar-sm me-3">
+                        <span class="avatar-text bg-primary-subtle text-primary">
+                          {{ initials(patient) }}
+                        </span>
+                      </div>
+                      <div>
+                        <div class="fw-semibold">
+                          {{ patient.user?.firstName }} {{ patient.user?.lastName }}
+                        </div>
+                        <small class="text-muted">{{ patient.user?.email }}</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="align-middle text-capitalize">
+                    {{ patient.gender ?? '—' }}
+                  </td>
+                  <td class="align-middle">
+                    @if (patient.bloodGroup) {
+                      <span class="badge bg-danger-subtle text-danger">{{ patient.bloodGroup }}</span>
+                    } @else {
+                      <span class="text-muted">—</span>
+                    }
+                  </td>
+                  <td class="align-middle">
+                    @if (patient.emergencyContactName) {
+                      <div>{{ patient.emergencyContactName }}</div>
+                      <small class="text-muted">{{ patient.emergencyContactPhone }}</small>
+                    } @else {
+                      <span class="text-muted">—</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </div>
+</div>

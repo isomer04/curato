@@ -1,0 +1,289 @@
+<!--
+  Appointment List Template
+  
+  Displays patient appointments with:
+  - Filter tabs for status
+  - Search input
+  - Responsive table
+  - Cancel modal
+-->
+
+<div class="container py-4">
+  <div class="row mb-4">
+    <div class="col">
+      <h2 class="fw-bold mb-1">My Appointments</h2>
+      <p class="text-muted">View and manage your scheduled appointments</p>
+    </div>
+    <div class="col-auto">
+      <a routerLink="/patient/book" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-2"></i>Book New
+      </a>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="card border-0 shadow-sm rounded-3 mb-4">
+    <div class="card-body">
+      <div class="row g-3 align-items-center">
+        <!-- Status Filter Tabs -->
+        <div class="col-md-8">
+          <div class="d-flex flex-wrap gap-2" role="toolbar" aria-label="Filter appointments">
+            @for (option of filterOptions; track option.value) {
+              <button
+                type="button"
+                class="btn"
+                [class.btn-primary]="selectedFilter() === option.value"
+                [class.btn-outline-secondary]="selectedFilter() !== option.value"
+                (click)="setFilter(option.value)"
+              >
+                {{ option.label }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Search Input -->
+        <div class="col-md-4">
+          <div class="input-group">
+            <span class="input-group-text bg-transparent">
+              <i class="bi bi-search"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Search by doctor..."
+              (input)="onSearch($event)"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Appointments Table -->
+  <div class="card border-0 shadow-sm rounded-3">
+    <div class="card-body p-0">
+      @if (isLoading()) {
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      } @else if (filteredAppointments().length === 0) {
+        <div class="text-center py-5">
+          <i class="bi bi-calendar-x display-4 text-muted"></i>
+          <p class="text-muted mt-3">No appointments found</p>
+          <a routerLink="/patient/book" class="btn btn-primary"> Book Your First Appointment </a>
+        </div>
+      } @else {
+        <!-- Appointment Card List -->
+        <div class="apt-list">
+          @for (apt of filteredAppointments(); track apt.id) {
+            <div class="apt-row">
+              <!-- Doctor Info -->
+              <div class="apt-row__doctor">
+                <div class="apt-avatar">{{ getDoctorInitials(apt) }}</div>
+                <div class="apt-row__doc-info">
+                  <span class="apt-row__doc-name">{{ getDoctorName(apt) }}</span>
+                  <span class="apt-row__specialty">{{ apt.doctor?.specialization }}</span>
+                </div>
+              </div>
+
+              <!-- Date & Time -->
+              <div class="apt-row__datetime">
+                <span class="apt-row__date">
+                  <i class="bi bi-calendar3 me-1"></i
+                  >{{ apt.appointmentDate | date: 'MMM d, yyyy' }}
+                </span>
+                <span class="apt-row__time">
+                  <i class="bi bi-clock me-1"></i>{{ apt.startTime }} – {{ apt.endTime }}
+                </span>
+              </div>
+
+              <!-- Reason -->
+              <div class="apt-row__reason" [title]="apt.reasonForVisit">
+                {{ apt.reasonForVisit | slice: 0 : truncateLength }}
+                @if (apt.reasonForVisit.length > truncateLength) {
+                  ...
+                }
+              </div>
+
+              <!-- Status + Actions -->
+              <div class="apt-row__footer">
+                <span class="badge" [class]="apt.status | statusBadge">
+                  {{ apt.status | titlecase }}
+                </span>
+                <div class="apt-row__actions">
+                  <button
+                    class="btn btn-sm btn-outline-primary"
+                    title="View details"
+                    (click)="openDetailsModal(apt)"
+                  >
+                    <i class="bi bi-eye"></i>
+                  </button>
+                  @if (canCancel(apt)) {
+                    <button
+                      class="btn btn-sm btn-outline-danger"
+                      title="Cancel"
+                      (click)="openCancelModal(apt)"
+                    >
+                      <i class="bi bi-x-lg"></i>
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Cancellation Modal -->
+@if (selectedAppointment()) {
+  <div class="modal-backdrop fade show"></div>
+  <div
+    class="modal fade show d-block"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="cancelModalTitle"
+    (keydown.escape)="closeCancelModal()"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="cancelModalTitle">Cancel Appointment</h5>
+          <button
+            type="button"
+            class="btn-close"
+            aria-label="Close cancel dialog"
+            (click)="closeCancelModal()"
+          >
+            <span class="visually-hidden">Close</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>You are about to cancel your appointment with:</p>
+          <div class="alert alert-warning">
+            <strong>{{ getDoctorName(selectedAppointment()!) }}</strong
+            ><br />
+            {{ selectedAppointment()?.appointmentDate | date: 'MMM d, yyyy' }} at
+            {{ selectedAppointment()?.startTime }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="cancelAppointmentReason">Reason for cancellation</label>
+            <textarea
+              id="cancelAppointmentReason"
+              class="form-control"
+              rows="3"
+              [ngModel]="cancellationReason()"
+              (ngModelChange)="cancellationReason.set($event)"
+              placeholder="Please provide a reason (minimum {{ minReasonLength }} characters)"
+            ></textarea>
+            <small class="text-muted">
+              {{ cancellationReason().length }}/{{ minReasonLength }} characters minimum
+            </small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeCancelModal()">
+            Keep Appointment
+          </button>
+          <button
+            type="button"
+            class="btn btn-danger"
+            [disabled]="cancellationReason().length < minReasonLength"
+            (click)="confirmCancel()"
+          >
+            Cancel Appointment
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Details Modal -->
+@if (viewingAppointment()) {
+  <div class="modal-backdrop fade show"></div>
+  <div
+    class="modal fade show d-block"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="detailsModalTitle"
+    (keydown.escape)="closeDetailsModal()"
+  >
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="detailsModalTitle">Appointment Details</h5>
+          <button
+            type="button"
+            class="btn-close"
+            aria-label="Close details dialog"
+            (click)="closeDetailsModal()"
+          >
+            <span class="visually-hidden">Close</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-4">
+            <div class="col-md-6">
+              <h6 class="text-muted mb-2">Doctor Information</h6>
+              <div class="d-flex align-items-center p-3 bg-light rounded-3">
+                <div class="avatar me-3">
+                  <span class="avatar-text bg-primary-subtle text-primary">
+                    {{ getDoctorInitials(viewingAppointment()!) }}
+                  </span>
+                </div>
+                <div>
+                  <h6 class="mb-1">{{ getDoctorName(viewingAppointment()!) }}</h6>
+                  <p class="mb-0 text-muted small">
+                    {{ viewingAppointment()?.doctor?.specialization }}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <h6 class="text-muted mb-2">Appointment Schedule</h6>
+              <div class="p-3 bg-light rounded-3">
+                <div class="mb-2">
+                  <i class="bi bi-calendar3 me-2 text-primary"></i>
+                  <strong>Date:</strong>
+                  {{ viewingAppointment()?.appointmentDate | date: 'fullDate' }}
+                </div>
+                <div>
+                  <i class="bi bi-clock me-2 text-primary"></i>
+                  <strong>Time:</strong> {{ viewingAppointment()?.startTime }} -
+                  {{ viewingAppointment()?.endTime }}
+                </div>
+              </div>
+            </div>
+            <div class="col-12">
+              <h6 class="text-muted mb-2">Visit Reason</h6>
+              <div class="p-3 bg-light rounded-3">
+                <p class="mb-0">{{ viewingAppointment()?.reasonForVisit }}</p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <h6 class="text-muted mb-2">Status</h6>
+              <div>
+                <span class="badge" [class]="viewingAppointment()!.status | statusBadge">
+                  {{ viewingAppointment()?.status | titlecase }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeDetailsModal()">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,494 @@
+<!--
+  Register Component Template
+  
+  Multi-step registration wizard with:
+  - Progress indicator
+  - Step navigation
+  - Role-based form fields
+  - Validation feedback
+  
+  Steps:
+  1. Account type and credentials
+  2. Personal information
+  3. Role-specific details and terms acceptance
+-->
+
+<div class="register-container">
+  <div class="container">
+    <div class="row justify-content-center py-5">
+      <div class="col-lg-7 col-md-9">
+        <!-- Registration Card -->
+        <div class="card border-0 shadow-lg rounded-4">
+          <div class="card-body p-4 p-md-5">
+            <!-- Header -->
+            <div class="text-center mb-4">
+              <div class="brand-icon mb-3">
+                <i class="bi bi-heart-pulse text-primary"></i>
+              </div>
+              <h2 class="fw-bold mb-1">Create Account</h2>
+              <p class="text-muted">Join Curato in just a few steps</p>
+            </div>
+
+            <!-- Progress Indicator -->
+            <div class="progress-container mb-4">
+              <div class="progress" style="height: 4px">
+                <div
+                  class="progress-bar"
+                  role="progressbar"
+                  [style.width.%]="progressPercentage()"
+                  [attr.aria-valuenow]="progressPercentage()"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                ></div>
+              </div>
+              <div class="step-indicators d-flex justify-content-between mt-2">
+                @for (step of [1, 2, 3]; track step) {
+                  <button
+                    type="button"
+                    class="step-indicator"
+                    [class.active]="currentStep() >= step"
+                    [class.current]="currentStep() === step"
+                    (click)="goToStep(step)"
+                    [disabled]="step > currentStep()"
+                  >
+                    <span class="step-number">{{ step }}</span>
+                    <span class="step-label d-none d-md-inline">
+                      @switch (step) {
+                        @case (1) {
+                          Account
+                        }
+                        @case (2) {
+                          Personal
+                        }
+                        @case (3) {
+                          Complete
+                        }
+                      }
+                    </span>
+                  </button>
+                }
+              </div>
+            </div>
+
+            <!-- Step 1: Account Type & Credentials -->
+            @if (currentStep() === 1) {
+              <form [formGroup]="accountForm" (ngSubmit)="nextStep()">
+                <!-- Role Selection -->
+                <fieldset class="mb-4 border-0 p-0 m-0">
+                  <legend class="form-label fw-semibold float-none w-auto fs-6 mb-2">
+                    I am a:
+                  </legend>
+                  <div class="row g-3">
+                    @for (option of roleOptions; track option.value) {
+                      <div class="col-6">
+                        <label
+                          class="role-card p-3 rounded-3 cursor-pointer d-block m-0"
+                          [class.selected]="accountForm.get('role')?.value === option.value"
+                          [for]="option.value"
+                        >
+                          <div class="form-check mb-0">
+                            <input
+                              type="radio"
+                              class="form-check-input"
+                              [id]="option.value"
+                              formControlName="role"
+                              [value]="option.value"
+                            />
+                            <div class="form-check-label w-100">
+                              <strong>{{ option.label }}</strong>
+                              <small class="d-block text-muted">{{ option.description }}</small>
+                            </div>
+                          </div>
+                        </label>
+                      </div>
+                    }
+                  </div>
+                </fieldset>
+
+                <!-- Email -->
+                <div class="mb-3">
+                  <label for="email" class="form-label">Email Address</label>
+                  <input
+                    type="email"
+                    id="email"
+                    class="form-control"
+                    [class.is-invalid]="
+                      hasError('account', 'email', 'required') ||
+                      hasError('account', 'email', 'email')
+                    "
+                    formControlName="email"
+                    placeholder="Enter your email"
+                  />
+                  @if (hasError('account', 'email', 'required')) {
+                    <div class="invalid-feedback">Email is required</div>
+                  }
+                  @if (hasError('account', 'email', 'email')) {
+                    <div class="invalid-feedback">Please enter a valid email</div>
+                  }
+                </div>
+
+                <!-- Password -->
+                <div class="mb-3">
+                  <label for="password" class="form-label">Password</label>
+                  <div class="input-group">
+                    <input
+                      [type]="showPassword() ? 'text' : 'password'"
+                      id="password"
+                      class="form-control"
+                      [class.is-invalid]="
+                        accountForm.get('password')?.touched && accountForm.get('password')?.invalid
+                      "
+                      formControlName="password"
+                      placeholder="Create a strong password"
+                    />
+                    <button
+                      type="button"
+                      class="btn btn-outline-secondary"
+                      (click)="togglePasswordVisibility('password')"
+                    >
+                      <i class="bi" [class]="showPassword() ? 'bi-eye-slash' : 'bi-eye'"></i>
+                    </button>
+                  </div>
+                  <!-- Password Strength Indicator -->
+                  @if (accountForm.get('password')?.value) {
+                    <div class="progress mt-2" style="height: 4px">
+                      <div
+                        class="progress-bar"
+                        [class]="getPasswordStrengthClass()"
+                        [style.width.%]="getPasswordStrength()"
+                      ></div>
+                    </div>
+                    <small class="text-muted">
+                      Password must contain uppercase, lowercase, number, and special character
+                    </small>
+                  }
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="mb-4">
+                  <label for="confirmPassword" class="form-label">Confirm Password</label>
+                  <div class="input-group">
+                    <input
+                      [type]="showConfirmPassword() ? 'text' : 'password'"
+                      id="confirmPassword"
+                      class="form-control"
+                      [class.is-invalid]="
+                        accountForm.hasError('passwordMismatch') &&
+                        accountForm.get('confirmPassword')?.touched
+                      "
+                      formControlName="confirmPassword"
+                      placeholder="Confirm your password"
+                    />
+                    <button
+                      type="button"
+                      class="btn btn-outline-secondary"
+                      (click)="togglePasswordVisibility('confirm')"
+                    >
+                      <i class="bi" [class]="showConfirmPassword() ? 'bi-eye-slash' : 'bi-eye'"></i>
+                    </button>
+                  </div>
+                  @if (
+                    accountForm.hasError('passwordMismatch') &&
+                    accountForm.get('confirmPassword')?.touched
+                  ) {
+                    <div class="invalid-feedback d-block">Passwords do not match</div>
+                  }
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2">
+                  Continue <i class="bi bi-arrow-right ms-2"></i>
+                </button>
+              </form>
+            }
+
+            <!-- Step 2: Personal Information -->
+            @if (currentStep() === 2) {
+              <form [formGroup]="personalForm" (ngSubmit)="nextStep()">
+                <div class="row g-3">
+                  <!-- First Name -->
+                  <div class="col-md-6">
+                    <label for="firstName" class="form-label">First Name</label>
+                    <input
+                      type="text"
+                      id="firstName"
+                      class="form-control"
+                      [class.is-invalid]="hasError('personal', 'firstName', 'required')"
+                      formControlName="firstName"
+                      placeholder="Enter first name"
+                    />
+                    @if (hasError('personal', 'firstName', 'required')) {
+                      <div class="invalid-feedback">First name is required</div>
+                    }
+                  </div>
+
+                  <!-- Last Name -->
+                  <div class="col-md-6">
+                    <label for="lastName" class="form-label">Last Name</label>
+                    <input
+                      type="text"
+                      id="lastName"
+                      class="form-control"
+                      [class.is-invalid]="hasError('personal', 'lastName', 'required')"
+                      formControlName="lastName"
+                      placeholder="Enter last name"
+                    />
+                    @if (hasError('personal', 'lastName', 'required')) {
+                      <div class="invalid-feedback">Last name is required</div>
+                    }
+                  </div>
+
+                  <!-- Phone -->
+                  <div class="col-md-6">
+                    <label for="phone" class="form-label">Phone Number</label>
+                    <input
+                      type="tel"
+                      id="phone"
+                      class="form-control"
+                      [class.is-invalid]="
+                        hasError('personal', 'phone', 'required') ||
+                        hasError('personal', 'phone', 'pattern')
+                      "
+                      formControlName="phone"
+                      placeholder="+1 (555) 123-4567"
+                    />
+                    @if (hasError('personal', 'phone', 'required')) {
+                      <div class="invalid-feedback">Phone number is required</div>
+                    }
+                    @if (hasError('personal', 'phone', 'pattern')) {
+                      <div class="invalid-feedback">Please enter a valid phone number</div>
+                    }
+                  </div>
+
+                  <!-- Date of Birth -->
+                  <div class="col-md-6">
+                    <label for="dateOfBirth" class="form-label">Date of Birth</label>
+                    <input
+                      type="date"
+                      id="dateOfBirth"
+                      class="form-control"
+                      [class.is-invalid]="hasError('personal', 'dateOfBirth', 'required')"
+                      formControlName="dateOfBirth"
+                    />
+                    @if (hasError('personal', 'dateOfBirth', 'required')) {
+                      <div class="invalid-feedback">Date of birth is required</div>
+                    }
+                  </div>
+
+                  <!-- Gender -->
+                  <div class="col-md-6">
+                    <label for="gender" class="form-label">Gender</label>
+                    <select
+                      id="gender"
+                      class="form-select"
+                      [class.is-invalid]="hasError('personal', 'gender', 'required')"
+                      formControlName="gender"
+                    >
+                      <option value="">Select gender</option>
+                      @for (gender of genderOptions; track gender) {
+                        <option [value]="gender">{{ gender | titlecase }}</option>
+                      }
+                    </select>
+                    @if (hasError('personal', 'gender', 'required')) {
+                      <div class="invalid-feedback">Gender is required</div>
+                    }
+                  </div>
+
+                  <!-- Address -->
+                  <div class="col-12">
+                    <label for="address" class="form-label"
+                      >Address <small class="text-muted">(Optional)</small></label
+                    >
+                    <input
+                      type="text"
+                      id="address"
+                      class="form-control"
+                      formControlName="address"
+                      placeholder="Enter your address"
+                    />
+                  </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="d-flex gap-3 mt-4">
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary flex-fill"
+                    (click)="previousStep()"
+                  >
+                    <i class="bi bi-arrow-left me-2"></i> Back
+                  </button>
+                  <button type="submit" class="btn btn-primary flex-fill">
+                    Continue <i class="bi bi-arrow-right ms-2"></i>
+                  </button>
+                </div>
+              </form>
+            }
+
+            <!-- Step 3: Role-Specific Information -->
+            @if (currentStep() === 3) {
+              <form [formGroup]="roleSpecificForm" (ngSubmit)="onSubmit()">
+                <!-- Patient-Specific Fields -->
+                @if (selectedRole() === 'patient') {
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <label for="bloodType" class="form-label">Blood Type</label>
+                      <select id="bloodType" class="form-select" formControlName="bloodType">
+                        <option value="">Select blood type</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                      </select>
+                    </div>
+                    <div class="col-md-6">
+                      <label for="allergies" class="form-label">Allergies</label>
+                      <input
+                        type="text"
+                        id="allergies"
+                        class="form-control"
+                        formControlName="allergies"
+                        placeholder="Comma-separated list"
+                      />
+                    </div>
+                    <div class="col-md-6">
+                      <label for="emergencyContactName" class="form-label"
+                        >Emergency Contact Name</label
+                      >
+                      <input
+                        type="text"
+                        id="emergencyContactName"
+                        class="form-control"
+                        formControlName="emergencyContactName"
+                        placeholder="Contact name"
+                      />
+                    </div>
+                    <div class="col-md-6">
+                      <label for="emergencyContactPhone" class="form-label"
+                        >Emergency Contact Phone</label
+                      >
+                      <input
+                        type="tel"
+                        id="emergencyContactPhone"
+                        class="form-control"
+                        formControlName="emergencyContactPhone"
+                        placeholder="+1 (555) 123-4567"
+                      />
+                    </div>
+                  </div>
+                }
+
+                <!-- Doctor-Specific Fields -->
+                @if (selectedRole() === 'doctor') {
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <label for="specialization" class="form-label">Specialization</label>
+                      <select
+                        id="specialization"
+                        class="form-select"
+                        formControlName="specialization"
+                      >
+                        <option value="">Select specialization</option>
+                        @for (spec of specializations; track spec) {
+                          <option [value]="spec">{{ spec }}</option>
+                        }
+                      </select>
+                    </div>
+                    <div class="col-md-6">
+                      <label for="licenseNumber" class="form-label">Medical License Number</label>
+                      <input
+                        type="text"
+                        id="licenseNumber"
+                        class="form-control"
+                        formControlName="licenseNumber"
+                        placeholder="Enter license number"
+                      />
+                    </div>
+                    <div class="col-md-6">
+                      <label for="yearsOfExperience" class="form-label">Years of Experience</label>
+                      <input
+                        type="number"
+                        id="yearsOfExperience"
+                        class="form-control"
+                        formControlName="yearsOfExperience"
+                        min="0"
+                      />
+                    </div>
+                    <div class="col-md-6">
+                      <label for="consultationFee" class="form-label">Consultation Fee ($)</label>
+                      <input
+                        type="number"
+                        id="consultationFee"
+                        class="form-control"
+                        formControlName="consultationFee"
+                        min="0"
+                      />
+                    </div>
+                    <div class="col-12">
+                      <label for="qualifications" class="form-label">Qualifications</label>
+                      <input
+                        type="text"
+                        id="qualifications"
+                        class="form-control"
+                        formControlName="qualifications"
+                        placeholder="Comma-separated (e.g., MD, MBBS, PhD)"
+                      />
+                    </div>
+                  </div>
+                }
+
+                <!-- Terms and Conditions -->
+                <div class="form-check mt-4">
+                  <input
+                    type="checkbox"
+                    class="form-check-input"
+                    [class.is-invalid]="hasError('roleSpecific', 'acceptTerms', 'required')"
+                    id="acceptTerms"
+                    formControlName="acceptTerms"
+                  />
+                  <label class="form-check-label" for="acceptTerms">
+                    I agree to the <a href="/terms" target="_blank">Terms of Service</a> and
+                    <a href="/privacy" target="_blank">Privacy Policy</a>
+                  </label>
+                  @if (hasError('roleSpecific', 'acceptTerms', 'required')) {
+                    <div class="invalid-feedback d-block">
+                      You must accept the terms to continue
+                    </div>
+                  }
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="d-flex gap-3 mt-4">
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary flex-fill"
+                    (click)="previousStep()"
+                  >
+                    <i class="bi bi-arrow-left me-2"></i> Back
+                  </button>
+                  <button type="submit" class="btn btn-primary flex-fill" [disabled]="isLoading()">
+                    @if (isLoading()) {
+                      <span class="spinner-border spinner-border-sm me-2"></span>
+                      Creating Account...
+                    } @else {
+                      Create Account <i class="bi bi-check-lg ms-2"></i>
+                    }
+                  </button>
+                </div>
+              </form>
+            }
+
+            <!-- Login Link -->
+            <p class="text-center mt-4 mb-0">
+              Already have an account?
+              <a routerLink="/auth/login" class="text-decoration-none fw-semibold">Sign in</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

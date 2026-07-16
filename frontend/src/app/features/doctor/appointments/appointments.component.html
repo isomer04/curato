@@ -1,0 +1,339 @@
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold mb-0">My Appointments</h2>
+    <div class="btn-group">
+      <button
+        class="btn"
+        [class.btn-primary]="viewMode() === 'list'"
+        [class.btn-outline-primary]="viewMode() !== 'list'"
+        (click)="viewMode.set('list')"
+      >
+        <i class="bi bi-list-ul me-1"></i> List
+      </button>
+      <button
+        class="btn"
+        [class.btn-primary]="viewMode() === 'calendar'"
+        [class.btn-outline-primary]="viewMode() !== 'calendar'"
+        (click)="viewMode.set('calendar')"
+      >
+        <i class="bi bi-calendar3 me-1"></i> Calendar
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="card border-0 shadow-sm rounded-3 mb-4">
+    <div class="card-body">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-3">
+          <label class="form-label small text-muted" for="statusFilter">Status</label>
+          <select
+            id="statusFilter"
+            class="form-select"
+            [ngModel]="selectedStatus()"
+            (ngModelChange)="selectedStatus.set($event); loadAppointments()"
+          >
+            <option value="">All Statuses</option>
+            <option value="scheduled">Scheduled</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small text-muted" for="startDate">From Date</label>
+          <input
+            type="date"
+            id="startDate"
+            class="form-control"
+            [ngModel]="startDate()"
+            (ngModelChange)="startDate.set($event); loadAppointments()"
+          />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small text-muted" for="endDate">To Date</label>
+          <input
+            type="date"
+            id="endDate"
+            class="form-control"
+            [ngModel]="endDate()"
+            (ngModelChange)="endDate.set($event); loadAppointments()"
+          />
+        </div>
+        <div class="col-md-3">
+          <button class="btn btn-outline-secondary w-100" (click)="resetFilters()">
+            <i class="bi bi-x-lg me-2"></i>Clear
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Appointments Table -->
+  <div class="card border-0 shadow-sm rounded-3">
+    <div class="card-body p-0">
+      @if (appointmentService.isLoading()) {
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status"></div>
+        </div>
+      } @else if (appointmentService.appointments().length === 0) {
+        <div class="text-center py-5">
+          <i class="bi bi-calendar-x display-3 text-muted"></i>
+          <h5 class="text-muted mt-3">No appointments found</h5>
+        </div>
+      } @else {
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Patient</th>
+                <th>Date & Time</th>
+                <th>Reason</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (apt of appointmentService.appointments(); track apt.id) {
+                <tr>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <div class="avatar-sm me-3">
+                        <span class="avatar-text bg-primary-subtle text-primary">
+                          {{ apt.patient?.user?.firstName?.charAt(0)
+                          }}{{ apt.patient?.user?.lastName?.charAt(0) }}
+                        </span>
+                      </div>
+                      <div>
+                        @if (apt.patient?.user?.firstName) {
+                          <div class="fw-semibold">
+                            {{ apt.patient?.user?.firstName }}
+                            {{ apt.patient?.user?.lastName }}
+                          </div>
+                          <small class="text-muted">{{ apt.patient?.user?.email }}</small>
+                        } @else {
+                          <span class="text-muted">—</span>
+                        }
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="fw-semibold">{{ apt.appointmentDate | date: 'MMM d, yyyy' }}</div>
+                    <small class="text-muted">{{ apt.startTime }} - {{ apt.endTime }}</small>
+                  </td>
+                  <td>
+                    <span class="text-truncate d-inline-block" style="max-width: 200px">
+                      {{ apt.reasonForVisit }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge rounded-pill" [class]="apt.status | statusBadge: 'solid'">
+                      {{ apt.status | titlecase }}
+                    </span>
+                  </td>
+                  <td class="apt-actions">
+                    <div class="d-flex flex-wrap gap-1">
+                      @if (apt.status === 'scheduled') {
+                        <button
+                          class="btn btn-sm btn-outline-success"
+                          title="Confirm"
+                          (click)="confirmAppointment(apt)"
+                        >
+                          <i class="bi bi-check-lg"></i>
+                        </button>
+                      }
+                      @if (apt.status === 'confirmed') {
+                        <button
+                          class="btn btn-sm btn-outline-primary"
+                          title="Complete"
+                          (click)="openCompleteModal(apt)"
+                        >
+                          <i class="bi bi-clipboard-check"></i>
+                        </button>
+                      }
+                      @if (apt.status === 'scheduled' || apt.status === 'confirmed') {
+                        <button
+                          class="btn btn-sm btn-outline-danger"
+                          title="Cancel"
+                          (click)="openCancelModal(apt)"
+                        >
+                          <i class="bi bi-x-lg"></i>
+                        </button>
+                      }
+                      <button
+                        class="btn btn-sm btn-outline-info"
+                        title="Verify Insurance"
+                        (click)="verifyPatientInsurance(apt)"
+                      >
+                        <i class="bi bi-shield-check"></i>
+                      </button>
+                      <button class="btn btn-sm btn-outline-secondary" title="View Details">
+                        <i class="bi bi-eye"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Complete Modal -->
+@if (showCompleteModal()) {
+  <div
+    class="modal fade show d-block"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="completeModalTitle"
+    (keydown.escape)="closeModals()"
+    style="background: rgba(0, 0, 0, 0.5)"
+  >
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="completeModalTitle">Complete Appointment</h5>
+          <button
+            type="button"
+            class="btn-close"
+            aria-label="Close"
+            (click)="closeModals()"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label fw-semibold" for="completionNotes">Consultation Notes</label>
+            <textarea
+              id="completionNotes"
+              class="form-control"
+              rows="4"
+              [ngModel]="completionNotes()"
+              (ngModelChange)="completionNotes.set($event)"
+              placeholder="Enter consultation notes..."
+            ></textarea>
+          </div>
+          <div class="mb-3">
+            <div class="form-label fw-semibold">Prescriptions</div>
+            @for (prescription of prescriptions(); track $index) {
+              <div class="card mb-2">
+                <div class="card-body py-2">
+                  <div class="row g-2">
+                    <div class="col-md-3">
+                      <input
+                        type="text"
+                        class="form-control form-control-sm"
+                        placeholder="Medication"
+                        [(ngModel)]="prescription.medication"
+                      />
+                    </div>
+                    <div class="col-md-2">
+                      <input
+                        type="text"
+                        class="form-control form-control-sm"
+                        placeholder="Dosage"
+                        [(ngModel)]="prescription.dosage"
+                      />
+                    </div>
+                    <div class="col-md-2">
+                      <input
+                        type="text"
+                        class="form-control form-control-sm"
+                        placeholder="Frequency"
+                        [(ngModel)]="prescription.frequency"
+                      />
+                    </div>
+                    <div class="col-md-2">
+                      <input
+                        type="text"
+                        class="form-control form-control-sm"
+                        placeholder="Duration"
+                        [(ngModel)]="prescription.duration"
+                      />
+                    </div>
+                    <div class="col-md-2">
+                      <input
+                        type="text"
+                        class="form-control form-control-sm"
+                        placeholder="Instructions"
+                        [(ngModel)]="prescription.instructions"
+                      />
+                    </div>
+                    <div class="col-md-1">
+                      <button
+                        class="btn btn-sm btn-outline-danger"
+                        (click)="removePrescription($index)"
+                      >
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+            <button class="btn btn-sm btn-outline-primary" (click)="addPrescription()">
+              <i class="bi bi-plus-lg me-1"></i> Add Prescription
+            </button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeModals()">Cancel</button>
+          <button type="button" class="btn btn-success" (click)="completeAppointment()">
+            <i class="bi bi-check-lg me-1"></i> Complete Appointment
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Cancel Modal -->
+@if (showCancelModal()) {
+  <div
+    class="modal fade show d-block"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="doctorCancelModalTitle"
+    (keydown.escape)="closeModals()"
+    style="background: rgba(0, 0, 0, 0.5)"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="doctorCancelModalTitle">Cancel Appointment</h5>
+          <button
+            type="button"
+            class="btn-close"
+            aria-label="Close"
+            (click)="closeModals()"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to cancel this appointment?</p>
+          <textarea
+            class="form-control"
+            rows="3"
+            [ngModel]="cancellationReason()"
+            (ngModelChange)="cancellationReason.set($event)"
+            placeholder="Reason for cancellation (minimum 10 characters)..."
+          ></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeModals()">Close</button>
+          <button
+            type="button"
+            class="btn btn-danger"
+            (click)="cancelAppointment()"
+            [disabled]="cancellationReason().length < 10"
+          >
+            Cancel Appointment
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

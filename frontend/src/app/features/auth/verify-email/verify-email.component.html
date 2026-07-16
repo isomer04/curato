@@ -1,0 +1,71 @@
+<div class="verify-container">
+    <div class="container">
+        <div class="row justify-content-center align-items-center min-vh-100">
+            <div class="col-md-5 col-lg-4">
+                <div class="card border-0 shadow-lg rounded-4">
+                    <div class="card-body p-4 p-md-5 text-center">
+
+                        <!-- Brand Icon -->
+                        <div class="brand-icon mb-3">
+                            <i class="bi bi-heart-pulse text-primary"></i>
+                        </div>
+
+                        <!-- Loading State -->
+                        @if (state() === 'loading') {
+                        <div>
+                            <div class="spinner-border text-primary mb-3" role="status">
+                                <span class="visually-hidden">Verifying...</span>
+                            </div>
+                            <h2 class="fw-bold mb-1">Verifying Your Email</h2>
+                            <p class="text-muted">Please wait while we confirm your email address…</p>
+                        </div>
+                        }
+
+                        <!-- Success State -->
+                        @if (state() === 'success') {
+                        <div>
+                            <div class="status-icon status-icon--success mb-3">
+                                <i class="bi bi-check-circle-fill"></i>
+                            </div>
+                            <h2 class="fw-bold mb-2">Email Verified!</h2>
+                            <p class="text-muted mb-4">{{ message() }}</p>
+                            <a routerLink="/auth/login" class="btn btn-primary w-100 py-2">
+                                Go to Login
+                            </a>
+                        </div>
+                        }
+
+                        <!-- Error State -->
+                        @if (state() === 'error') {
+                        <div>
+                            <div class="status-icon status-icon--error mb-3">
+                                <i class="bi bi-x-circle-fill"></i>
+                            </div>
+                            <h2 class="fw-bold mb-2">Verification Failed</h2>
+                            <p class="text-muted mb-4">{{ message() }}</p>
+                            <a routerLink="/auth/login" class="btn btn-primary w-100 py-2">
+                                Go to Login
+                            </a>
+                        </div>
+                        }
+
+                        <!-- No Token State -->
+                        @if (state() === 'no-token') {
+                        <div>
+                            <div class="status-icon status-icon--error mb-3">
+                                <i class="bi bi-link-45deg"></i>
+                            </div>
+                            <h2 class="fw-bold mb-2">Invalid Link</h2>
+                            <p class="text-muted mb-4">{{ message() }}</p>
+                            <a routerLink="/auth/login" class="btn btn-primary w-100 py-2">
+                                Go to Login
+                            </a>
+                        </div>
+                        }
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

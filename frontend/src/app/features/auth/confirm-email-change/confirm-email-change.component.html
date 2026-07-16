@@ -1,0 +1,49 @@
+<div class="confirm-email-page">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-6 col-lg-5">
+        <div class="status-card">
+          
+          @if (status() === 'loading') {
+            <div class="status-content">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <h2 class="mt-4 mb-2">Confirming your email...</h2>
+              <p class="text-muted">Please wait while we verify your request.</p>
+            </div>
+          }
+          
+          @if (status() === 'success') {
+            <div class="status-content success">
+              <div class="status-icon">
+                <i class="bi bi-check-circle-fill text-success"></i>
+              </div>
+              <h2 class="mt-4 mb-2">Email Changed Successfully!</h2>
+              <p class="text-muted">
+                Your email address has been successfully updated. Please log in again with your new email.
+              </p>
+              <button class="btn btn-primary w-100 mt-4 py-2" (click)="goToLogin()">
+                Back to Login
+              </button>
+            </div>
+          }
+          
+          @if (status() === 'error') {
+            <div class="status-content error">
+              <div class="status-icon">
+                <i class="bi bi-exclamation-triangle-fill text-danger"></i>
+              </div>
+              <h2 class="mt-4 mb-2 text-danger">Confirmation Failed</h2>
+              <p class="text-muted">{{ errorMessage() }}</p>
+              <button class="btn btn-outline-primary w-100 mt-4 py-2" (click)="goToLogin()">
+                Back to Login
+              </button>
+            </div>
+          }
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,358 @@
+<div class="container py-4">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+    <div>
+      <h2 class="fw-bold mb-1"><i class="bi bi-shield-check me-2 text-primary"></i>Insurance</h2>
+      <p class="text-muted mb-0">Manage your insurance plans and verification</p>
+    </div>
+    @if (!showForm()) {
+      <button class="btn btn-primary flex-shrink-0" (click)="openForm()" id="add-insurance-btn">
+        <i class="bi bi-plus-lg me-1"></i> Add Insurance
+      </button>
+    }
+  </div>
+
+  <!-- Alerts -->
+  @if (error()) {
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <i class="bi bi-exclamation-circle me-2"></i>{{ error() }}
+      <button type="button" class="btn-close" (click)="error.set(null)" aria-label="Close"></button>
+    </div>
+  }
+  @if (success()) {
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      <i class="bi bi-check-circle me-2"></i>{{ success() }}
+      <button
+        type="button"
+        class="btn-close"
+        (click)="success.set(null)"
+        aria-label="Close"
+      ></button>
+    </div>
+  }
+
+  <!-- Form -->
+  @if (showForm()) {
+    <div class="card border-0 shadow-sm mb-4 animate-slide-in">
+      <div class="card-header bg-primary bg-opacity-10 border-0">
+        <h5 class="mb-0">
+          <i class="bi bi-pencil-square me-2"></i>
+          {{ editingId() ? 'Edit' : 'Add New' }} Insurance Plan
+        </h5>
+      </div>
+      <div class="card-body p-4">
+        <form [formGroup]="insuranceForm" (ngSubmit)="onSubmit()">
+          <div class="row g-3">
+            <!-- Provider Name -->
+            <div class="col-md-6">
+              <label for="providerName" class="form-label fw-semibold">
+                Insurance Provider <span class="text-danger">*</span>
+              </label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-building"></i></span>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="providerName"
+                  formControlName="providerName"
+                  placeholder="e.g. Blue Cross Blue Shield"
+                />
+              </div>
+              @if (hasError('providerName', 'required')) {
+                <div class="text-danger small mt-1">Provider name is required</div>
+              }
+            </div>
+
+            <!-- Policy Number -->
+            <div class="col-md-6">
+              <label for="policyNumber" class="form-label fw-semibold">
+                Policy Number <span class="text-danger">*</span>
+              </label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-hash"></i></span>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="policyNumber"
+                  formControlName="policyNumber"
+                  placeholder="e.g. POL-12345678"
+                />
+              </div>
+              @if (hasError('policyNumber', 'required')) {
+                <div class="text-danger small mt-1">Policy number is required</div>
+              }
+            </div>
+
+            <!-- Group Number -->
+            <div class="col-md-4">
+              <label for="groupNumber" class="form-label fw-semibold">Group Number</label>
+              <input
+                type="text"
+                class="form-control"
+                id="groupNumber"
+                formControlName="groupNumber"
+                placeholder="Optional"
+              />
+            </div>
+
+            <!-- Subscriber Name -->
+            <div class="col-md-4">
+              <label for="subscriberName" class="form-label fw-semibold">
+                Subscriber Name <span class="text-danger">*</span>
+              </label>
+              <input
+                type="text"
+                class="form-control"
+                id="subscriberName"
+                formControlName="subscriberName"
+                placeholder="Full name of subscriber"
+              />
+              @if (hasError('subscriberName', 'required')) {
+                <div class="text-danger small mt-1">Subscriber name is required</div>
+              }
+            </div>
+
+            <!-- Subscriber Relation -->
+            <div class="col-md-4">
+              <label for="subscriberRelation" class="form-label fw-semibold">Relationship</label>
+              <select
+                class="form-select"
+                id="subscriberRelation"
+                formControlName="subscriberRelation"
+              >
+                <option value="self">Self</option>
+                <option value="spouse">Spouse</option>
+                <option value="child">Child</option>
+                <option value="parent">Parent</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <!-- Plan Type -->
+            <div class="col-md-4">
+              <label for="planType" class="form-label fw-semibold">Plan Type</label>
+              <select class="form-select" id="planType" formControlName="planType">
+                <option value="">Select plan type</option>
+                <option value="HMO">HMO</option>
+                <option value="PPO">PPO</option>
+                <option value="EPO">EPO</option>
+                <option value="POS">POS</option>
+                <option value="HDHP">HDHP</option>
+                <option value="Medicare">Medicare</option>
+                <option value="Medicaid">Medicaid</option>
+              </select>
+            </div>
+
+            <!-- Coverage Start Date -->
+            <div class="col-md-4">
+              <label for="coverageStartDate" class="form-label fw-semibold">
+                Coverage Start <span class="text-danger">*</span>
+              </label>
+              <input
+                type="date"
+                class="form-control"
+                id="coverageStartDate"
+                formControlName="coverageStartDate"
+              />
+              @if (hasError('coverageStartDate', 'required')) {
+                <div class="text-danger small mt-1">Start date is required</div>
+              }
+            </div>
+
+            <!-- Coverage End Date -->
+            <div class="col-md-4">
+              <label for="coverageEndDate" class="form-label fw-semibold">Coverage End</label>
+              <input
+                type="date"
+                class="form-control"
+                id="coverageEndDate"
+                formControlName="coverageEndDate"
+              />
+            </div>
+
+            <!-- Copay Amount -->
+            <div class="col-md-3">
+              <label for="copayAmount" class="form-label fw-semibold">Copay ($)</label>
+              <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="copayAmount"
+                  formControlName="copayAmount"
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+            </div>
+
+            <!-- Deductible Amount -->
+            <div class="col-md-3">
+              <label for="deductibleAmount" class="form-label fw-semibold">Deductible ($)</label>
+              <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="deductibleAmount"
+                  formControlName="deductibleAmount"
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="d-flex flex-wrap gap-2 mt-4">
+            <button
+              type="submit"
+              class="btn btn-primary"
+              [disabled]="insuranceForm.invalid || isLoading()"
+            >
+              @if (isLoading()) {
+                <span class="spinner-border spinner-border-sm me-1"></span>
+              }
+              <i class="bi bi-check-lg me-1"></i>
+              {{ editingId() ? 'Update' : 'Save' }} Insurance
+            </button>
+            <button type="button" class="btn btn-outline-secondary" (click)="closeForm()">
+              <i class="bi bi-x-lg me-1"></i> Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- Loading -->
+  @if (isLoading() && !showForm()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="text-muted mt-2">Loading insurance records...</p>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!isLoading() && insurances().length === 0 && !showForm()) {
+    <div class="text-center py-5">
+      <div
+        class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+        style="width: 80px; height: 80px"
+      >
+        <i class="bi bi-shield-plus fs-1 text-primary"></i>
+      </div>
+      <h5 class="fw-semibold">No Insurance Records</h5>
+      <p class="text-muted mb-3">Add your insurance information to keep your profile up to date.</p>
+      <button class="btn btn-primary" (click)="openForm()">
+        <i class="bi bi-plus-lg me-1"></i> Add Your First Insurance Plan
+      </button>
+    </div>
+  }
+
+  <!-- Insurance Cards -->
+  @if (!isLoading() && insurances().length > 0) {
+    <div class="row g-3">
+      @for (insurance of insurances(); track insurance.id) {
+        <div class="col-lg-6">
+          <div class="card border-0 shadow-sm insurance-card h-100">
+            <div class="card-body p-4">
+              <!-- Header Row -->
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="icon-box rounded-3 bg-primary bg-opacity-10">
+                    <i class="bi bi-shield-fill-check fs-4 text-primary"></i>
+                  </div>
+                  <div>
+                    <h5 class="fw-bold mb-0">{{ insurance.providerName }}</h5>
+                    <span class="text-muted small"
+                      >{{ insurance.planType || 'Standard' }} Plan</span
+                    >
+                  </div>
+                </div>
+                <span class="badge rounded-pill {{ getStatusClass(insurance.verificationStatus) }}">
+                  <i class="{{ getStatusIcon(insurance.verificationStatus) }} me-1"></i>
+                  {{ insurance.verificationStatus | titlecase }}
+                </span>
+              </div>
+
+              <!-- Details -->
+              <div class="row g-2 mb-3">
+                <div class="col-6">
+                  <div class="small text-muted">Policy Number</div>
+                  <div class="fw-semibold">{{ insurance.policyNumber }}</div>
+                </div>
+                @if (insurance.groupNumber) {
+                  <div class="col-6">
+                    <div class="small text-muted">Group Number</div>
+                    <div class="fw-semibold">{{ insurance.groupNumber }}</div>
+                  </div>
+                }
+                <div class="col-6">
+                  <div class="small text-muted">Subscriber</div>
+                  <div class="fw-semibold">{{ insurance.subscriberName }}</div>
+                </div>
+                <div class="col-6">
+                  <div class="small text-muted">Coverage Period</div>
+                  <div class="fw-semibold">
+                    {{ insurance.coverageStartDate | date: 'MMM d, y' }}
+                    @if (insurance.coverageEndDate) {
+                      <span> — {{ insurance.coverageEndDate | date: 'MMM d, y' }}</span>
+                    }
+                  </div>
+                </div>
+                @if (insurance.copayAmount) {
+                  <div class="col-6">
+                    <div class="small text-muted">Copay</div>
+                    <div class="fw-semibold text-success">${{ insurance.copayAmount }}</div>
+                  </div>
+                }
+                @if (insurance.deductibleAmount) {
+                  <div class="col-6">
+                    <div class="small text-muted">Deductible</div>
+                    <div class="fw-semibold">${{ insurance.deductibleAmount }}</div>
+                  </div>
+                }
+              </div>
+
+              <!-- Active Badge -->
+              @if (!insurance.isActive) {
+                <div class="alert alert-secondary py-1 px-2 mb-2 small">
+                  <i class="bi bi-info-circle me-1"></i> This insurance is inactive
+                </div>
+              }
+
+              <!-- Actions -->
+              <div class="d-flex gap-2 pt-2 border-top">
+                <button
+                  class="btn btn-sm btn-outline-primary"
+                  (click)="openForm(insurance)"
+                  [disabled]="!insurance.isActive"
+                  id="edit-insurance-{{ insurance.id }}"
+                >
+                  <i class="bi bi-pencil me-1"></i> Edit
+                </button>
+                @if (insurance.isActive) {
+                  <button
+                    class="btn btn-sm btn-outline-warning"
+                    (click)="deactivateInsurance(insurance.id)"
+                  >
+                    <i class="bi bi-pause-circle me-1"></i> Deactivate
+                  </button>
+                }
+                <button
+                  class="btn btn-sm btn-outline-danger ms-auto"
+                  (click)="deleteInsurance(insurance.id)"
+                >
+                  <i class="bi bi-trash me-1"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

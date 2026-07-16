@@ -1,0 +1,175 @@
+/**
+ * App Component Styles
+ * 
+ * Global layout styles for the application shell.
+ */
+
+// ============================================================================
+// LAYOUT STRUCTURE
+// ============================================================================
+
+/**
+ * Root host element uses flexbox to push footer to bottom.
+ */
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/**
+ * Main content area fills available space.
+ * This pushes the footer to the bottom when content is short.
+ */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+// ============================================================================
+// AUTHENTICATED SHELL (Sidebar layout)
+// ============================================================================
+
+/**
+ * Outer shell when sidebar is active.
+ * Sidebar is 240px fixed, content fills the rest.
+ */
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+
+  // On mobile the sidebar becomes a drawer — stack header above content, not beside it.
+  @media (max-width: 991px) {
+    flex-direction: column;
+  }
+}
+
+/**
+ * Content area shifts right by sidebar width on desktop.
+ */
+.app-shell__content {
+  flex: 1;
+  min-width: 0;
+  margin-left: 240px;
+  display: flex;
+  flex-direction: column;
+
+  // On mobile the sidebar is a drawer — no margin offset needed.
+  // padding-top offsets the sticky mobile-header (~60px) so content is not hidden beneath it.
+  @media (max-width: 991px) {
+    margin-left: 0;
+    padding-top: 60px;
+  }
+}
+
+// ============================================================================
+// TOAST NOTIFICATION STYLES
+// ============================================================================
+
+/**
+ * Toast container positioned at top-right.
+ */
+.toast-container {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1100;
+  max-width: 350px;
+}
+
+/**
+ * Base toast styles.
+ */
+.toast {
+  margin-bottom: 0.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  animation: slideIn 0.3s ease-out;
+}
+
+/**
+ * Toast type-specific styling.
+ */
+.toast-success {
+  .toast-header {
+    background-color: #d1fae5;
+    color: #065f46;
+    border-bottom-color: #a7f3d0;
+  }
+
+  .toast-body {
+    background-color: #ecfdf5;
+  }
+}
+
+.toast-error {
+  .toast-header {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border-bottom-color: #fecaca;
+  }
+
+  .toast-body {
+    background-color: #fef2f2;
+  }
+}
+
+.toast-warning {
+  .toast-header {
+    background-color: #fef3c7;
+    color: #92400e;
+    border-bottom-color: #fde68a;
+  }
+
+  .toast-body {
+    background-color: #fffbeb;
+  }
+}
+
+.toast-info {
+  .toast-header {
+    background-color: #dbeafe;
+    color: #1e40af;
+    border-bottom-color: #bfdbfe;
+  }
+
+  .toast-body {
+    background-color: #eff6ff;
+  }
+}
+
+// ============================================================================
+// ANIMATIONS
+// ============================================================================
+
+/**
+ * Slide-in animation for toast notifications.
+ */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+// ============================================================================
+// RESPONSIVE ADJUSTMENTS
+// ============================================================================
+
+/**
+ * Mobile toast takes full width with margin.
+ */
+@media (max-width: 575.98px) {
+  .toast-container {
+    left: 1rem;
+    right: 1rem;
+    max-width: none;
+  }
+}

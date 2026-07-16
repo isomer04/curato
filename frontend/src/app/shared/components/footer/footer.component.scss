@@ -1,0 +1,169 @@
+/**
+ * Footer Component Styles
+ * 
+ * Styles for the application footer.
+ * Uses a dark theme to contrast with the main content area.
+ */
+
+// ============================================================================
+// MAIN FOOTER STYLES
+// ============================================================================
+
+/**
+ * Footer container with dark background.
+ */
+.footer {
+    margin-top: auto; // Pushes footer to bottom of page
+}
+
+// ============================================================================
+// BRAND SECTION
+// ============================================================================
+
+/**
+ * Footer brand styling with gradient text.
+ */
+.footer-brand {
+    display: flex;
+    align-items: center;
+
+    i {
+        font-size: 1.5rem;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+}
+
+// ============================================================================
+// LINK STYLES
+// ============================================================================
+
+/**
+ * Footer section headings.
+ */
+.footer-heading {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #fff;
+    position: relative;
+    padding-bottom: 0.75rem;
+
+    // Decorative underline
+    &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 40px;
+        height: 2px;
+        background: var(--primary-gradient);
+        border-radius: 2px;
+    }
+}
+
+/**
+ * Footer link list styling.
+ */
+.footer-links {
+    li {
+        margin-bottom: 0.5rem;
+    }
+
+    a {
+        color: rgba(255, 255, 255, 0.6);
+        text-decoration: none;
+        transition: color 0.2s ease, padding-left 0.2s ease;
+        display: inline-block;
+
+        &:hover {
+            color: #fff;
+            padding-left: 0.25rem;
+        }
+    }
+}
+
+// ============================================================================
+// SOCIAL LINK STYLES
+// ============================================================================
+
+/**
+ * Social media link buttons.
+ * Circular design with hover effects.
+ */
+.social-link {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    transition: all 0.2s ease;
+
+    &:hover {
+        background: var(--primary-gradient);
+        transform: translateY(-2px);
+        color: #fff;
+    }
+
+    i {
+        font-size: 1rem;
+    }
+}
+
+// ============================================================================
+// CONTACT INFO STYLES
+// ============================================================================
+
+/**
+ * Contact information links.
+ */
+.text-light-emphasis {
+    color: rgba(255, 255, 255, 0.6) !important;
+
+    &:hover {
+        color: #fff !important;
+    }
+}
+
+// ============================================================================
+// FOOTER BOTTOM BAR
+// ============================================================================
+
+/**
+ * Copyright bar at the bottom.
+ */
+.footer-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+// ============================================================================
+// RESPONSIVE ADJUSTMENTS
+// ============================================================================
+
+/**
+ * Mobile-specific adjustments.
+ */
+@media (max-width: 767.98px) {
+    .footer {
+        text-align: center;
+    }
+
+    .footer-heading::after {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .social-links {
+        justify-content: center;
+    }
+
+    .footer-links a {
+        &:hover {
+            padding-left: 0; // Disable left padding animation on mobile
+        }
+    }
+}

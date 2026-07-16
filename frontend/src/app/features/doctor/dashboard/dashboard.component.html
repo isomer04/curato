@@ -1,0 +1,207 @@
+<!--
+  Doctor Dashboard Template
+  
+  Layout:
+  - Welcome banner with personalized greeting
+  - Statistics cards row
+  - Two-column layout: Today's appointments table + Quick actions
+-->
+
+<div class="container py-4">
+  <!-- Welcome Banner -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card welcome-card text-white rounded-4 border-0">
+        <div class="card-body p-4">
+          <div class="row align-items-center">
+            <div class="col-lg-8">
+              <h2 class="fw-bold mb-2">
+                Good {{ getGreeting() }}, Dr. {{ authService.currentUser()?.lastName }}! 🩺
+              </h2>
+              <p class="mb-3 opacity-75">
+                You have {{ stats().todayCount }} appointments scheduled for today.
+              </p>
+              <a routerLink="/doctor/schedule" class="btn btn-light">
+                <i class="bi bi-calendar3 me-2"></i>
+                View Schedule
+              </a>
+            </div>
+            <div class="col-lg-4 text-center d-none d-lg-block">
+              <i class="bi bi-clipboard2-pulse display-1 opacity-50"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="row">
+      <div class="col-12 text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading dashboard...</span>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <!-- Statistics Cards -->
+    <div class="row mb-4 g-4">
+      <!-- Today's Appointments -->
+      <div class="col-6 col-md-3">
+        <div class="card h-100 border-0 shadow-sm rounded-3 stat-card">
+          <div class="card-body d-flex align-items-center">
+            <div class="icon-box bg-primary-subtle text-primary rounded-3 p-3 me-3">
+              <i class="bi bi-calendar-day fs-4"></i>
+            </div>
+            <div>
+              <h3 class="fw-bold mb-0">{{ stats().todayCount }}</h3>
+              <small class="text-muted">Today</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pending Confirmation -->
+      <div class="col-6 col-md-3">
+        <div class="card h-100 border-0 shadow-sm rounded-3 stat-card">
+          <div class="card-body d-flex align-items-center">
+            <div class="icon-box bg-warning-subtle text-warning rounded-3 p-3 me-3">
+              <i class="bi bi-hourglass-split fs-4"></i>
+            </div>
+            <div>
+              <h3 class="fw-bold mb-0">{{ stats().pendingConfirmation }}</h3>
+              <small class="text-muted">Pending Confirmation</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Completed This Week -->
+      <div class="col-6 col-md-3">
+        <div class="card h-100 border-0 shadow-sm rounded-3 stat-card">
+          <div class="card-body d-flex align-items-center">
+            <div class="icon-box bg-success-subtle text-success rounded-3 p-3 me-3">
+              <i class="bi bi-check-circle fs-4"></i>
+            </div>
+            <div>
+              <h3 class="fw-bold mb-0">{{ stats().completedThisWeek }}</h3>
+              <small class="text-muted">Completed This Week</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total Patients -->
+      <div class="col-6 col-md-3">
+        <div class="card h-100 border-0 shadow-sm rounded-3 stat-card">
+          <div class="card-body d-flex align-items-center">
+            <div class="icon-box bg-info-subtle text-info rounded-3 p-3 me-3">
+              <i class="bi bi-people fs-4"></i>
+            </div>
+            <div>
+              <h3 class="fw-bold mb-0">{{ stats().totalPatients }}</h3>
+              <small class="text-muted">Total Patients</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Today's Schedule & Quick Actions -->
+    <div class="row g-4">
+      <!-- Today's Appointments Table -->
+      <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-3">
+          <div
+            class="card-header bg-transparent border-0 pt-4 px-4 d-flex justify-content-between align-items-center"
+          >
+            <h5 class="fw-bold mb-0">Today's Appointments</h5>
+            <a routerLink="/doctor/appointments" class="btn btn-sm btn-link text-decoration-none">
+              View All <i class="bi bi-arrow-right"></i>
+            </a>
+          </div>
+          <div class="card-body p-4">
+            @if (todaysAppointments().length === 0) {
+              <div class="text-center py-4">
+                <i class="bi bi-calendar-check display-4 text-muted"></i>
+                <p class="text-muted mt-3">No appointments for today</p>
+              </div>
+            } @else {
+              <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Time</th>
+                      <th>Patient</th>
+                      <th>Reason</th>
+                      <th>Status</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (apt of todaysAppointments(); track apt.id) {
+                      <tr>
+                        <td class="fw-semibold">{{ apt.startTime }}</td>
+                        <td>
+                          <div class="d-flex align-items-center">
+                            <div class="avatar-sm me-2">
+                              <span class="avatar-text bg-primary-subtle text-primary">
+                                {{ getPatientInitials(apt) }}
+                              </span>
+                            </div>
+                            <div>
+                              <div class="fw-semibold">{{ getPatientName(apt) }}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td class="text-muted">
+                          {{ apt.reasonForVisit | slice: 0 : truncateLength }}
+                          @if (apt.reasonForVisit.length > truncateLength) {
+                            ...
+                          }
+                        </td>
+                        <td>
+                          <span class="badge" [class]="apt.status | statusBadge: 'solid'">
+                            {{ apt.status | titlecase }}
+                          </span>
+                        </td>
+                        <td>
+                          <button class="btn btn-sm btn-outline-primary" title="View details">
+                            <i class="bi bi-eye"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions Panel -->
+      <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-3 h-100">
+          <div class="card-header bg-transparent border-0 pt-4 px-4">
+            <h5 class="fw-bold mb-0">Quick Actions</h5>
+          </div>
+          <div class="card-body p-4">
+            <div class="d-grid gap-3">
+              @for (action of quickActions; track action.route) {
+                <a
+                  [routerLink]="action.route"
+                  class="btn btn-outline-primary text-start quick-action-btn"
+                >
+                  <i class="bi me-2" [class]="action.icon"></i>
+                  {{ action.label }}
+                </a>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

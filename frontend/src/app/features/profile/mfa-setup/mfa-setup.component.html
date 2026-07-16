@@ -1,0 +1,58 @@
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4 p-md-5 text-center">
+                    <h3 class="fw-bold mb-3">Set up Multi-Factor Authentication</h3>
+
+                    @if (isLoading()) {
+                    <div class="d-flex justify-content-center my-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                    } @else if (!qrCodeUrl()) {
+                    <p class="text-muted mb-4">
+                        Multi-Factor Authentication (MFA) adds an extra layer of security to your account.
+                    </p>
+                    <button class="btn btn-primary" (click)="initializeSetup()">Start Setup</button>
+                    <br>
+                    <button class="btn btn-link mt-2 text-decoration-none" (click)="goBack()">Go Back</button>
+                    } @else {
+                    <p class="text-muted mb-4">Scan the QR code below using an authenticator app like Google
+                        Authenticator or Authy.
+                    </p>
+
+                    <div class="mb-4 text-center">
+                        <img [src]="qrCodeUrl()" alt="MFA QR Code" class="img-fluid border rounded"
+                            style="max-height: 200px;">
+                    </div>
+
+                    <div class="alert alert-light border small text-break mb-4">
+                        <strong>Secret Key:</strong> {{ secret() }}
+                    </div>
+
+                    <form [formGroup]="mfaForm" (ngSubmit)="verifySetup()">
+                        <div class="mb-3">
+                            <label for="code" class="form-label text-start d-block">Enter 6-digit code</label>
+                            <input type="text" id="code" class="form-control text-center" formControlName="code"
+                                placeholder="000000" maxlength="6">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100"
+                            [disabled]="mfaForm.invalid || isVerifying()">
+                            @if (isVerifying()) {
+                            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                            Verifying...
+                            } @else {
+                            Verify & Enable MFA
+                            }
+                        </button>
+                    </form>
+                    <button class="btn btn-link mt-3 w-100 text-decoration-none" (click)="goBack()">Cancel</button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

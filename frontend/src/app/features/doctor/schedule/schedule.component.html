@@ -1,0 +1,267 @@
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+    <div>
+      <h2 class="fw-bold mb-1">Manage Schedule</h2>
+      <p class="text-muted mb-0">Set your availability for appointments</p>
+    </div>
+    <button class="btn btn-primary" (click)="saveSchedule()" [disabled]="isSaving()">
+      @if (isSaving()) {
+        <span class="spinner-border spinner-border-sm me-2"></span>
+      }
+      <i class="bi bi-check-lg me-2"></i> Save Changes
+    </button>
+  </div>
+
+  <!-- Weekly Schedule -->
+  <div class="card border-0 shadow-sm rounded-3">
+    <div class="card-header bg-transparent border-0 pt-4 px-4">
+      <h5 class="fw-bold mb-0">Weekly Availability</h5>
+    </div>
+    <div class="card-body p-4">
+      @for (day of daysOfWeek; track day) {
+        <div class="row align-items-start py-3 border-bottom day-row">
+          <div class="col-12 col-md-2 mb-2 mb-md-0">
+            <div class="form-check form-switch">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                [id]="day"
+                [(ngModel)]="schedule()[day].isActive"
+              />
+              <label class="form-check-label fw-semibold" [for]="day">
+                {{ day | titlecase }}
+              </label>
+            </div>
+          </div>
+          <div class="col-12 col-md-10">
+            @if (schedule()[day].isActive) {
+              <div class="row g-3">
+                <div class="col-6 col-md-3">
+                  <label class="form-label small text-muted" [for]="'start-' + day"
+                    >Start Time</label
+                  >
+                  <input
+                    type="time"
+                    [id]="'start-' + day"
+                    class="form-control"
+                    [(ngModel)]="schedule()[day].startTime"
+                  />
+                </div>
+                <div class="col-6 col-md-3">
+                  <label class="form-label small text-muted" [for]="'end-' + day">End Time</label>
+                  <input
+                    type="time"
+                    [id]="'end-' + day"
+                    class="form-control"
+                    [(ngModel)]="schedule()[day].endTime"
+                  />
+                </div>
+                <div class="col-6 col-md-3">
+                  <label class="form-label small text-muted" [for]="'duration-' + day"
+                    >Slot Duration</label
+                  >
+                  <select
+                    [id]="'duration-' + day"
+                    class="form-select"
+                    [(ngModel)]="schedule()[day].slotDuration"
+                  >
+                    <option [value]="15">15 minutes</option>
+                    <option [value]="30">30 minutes</option>
+                    <option [value]="45">45 minutes</option>
+                    <option [value]="60">60 minutes</option>
+                  </select>
+                </div>
+                <div class="col-6 col-md-3">
+                  <label class="form-label small text-muted" [for]="'break-start-' + day"
+                    >Break Start</label
+                  >
+                  <input
+                    type="time"
+                    [id]="'break-start-' + day"
+                    class="form-control"
+                    [(ngModel)]="schedule()[day].breakStart"
+                    aria-label="Break start time"
+                  />
+                </div>
+                <div class="col-6 col-md-3">
+                  <label class="form-label small text-muted" [for]="'break-end-' + day"
+                    >Break End</label
+                  >
+                  <input
+                    type="time"
+                    [id]="'break-end-' + day"
+                    class="form-control"
+                    [(ngModel)]="schedule()[day].breakEnd"
+                    aria-label="Break end time"
+                  />
+                </div>
+              </div>
+            } @else {
+              <span class="text-muted">Not available</span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Time Off / Vacation -->
+  <div class="card border-0 shadow-sm rounded-3 mt-4">
+    <div
+      class="card-header bg-transparent border-0 pt-4 px-4 d-flex justify-content-between align-items-center"
+    >
+      <h5 class="fw-bold mb-0">Time Off / Vacation</h5>
+      <button class="btn btn-sm btn-outline-primary" (click)="addTimeOff()">
+        <i class="bi bi-plus-lg me-1"></i> Add Time Off
+      </button>
+    </div>
+    <div class="card-body p-4">
+      @if (timeOffList().length === 0) {
+        <div class="text-center py-4 text-muted">
+          <i class="bi bi-calendar-x display-4"></i>
+          <p class="mt-2">No upcoming time off scheduled</p>
+        </div>
+      } @else {
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Reason</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (timeOff of timeOffList(); track $index) {
+                <tr>
+                  <td>{{ timeOff.startDate | date: 'MMM d, yyyy' }}</td>
+                  <td>{{ timeOff.endDate | date: 'MMM d, yyyy' }}</td>
+                  <td>{{ timeOff.reason }}</td>
+                  <td>
+                    <button class="btn btn-sm btn-outline-danger" (click)="removeTimeOff($index)">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Quick Templates -->
+  <div class="card border-0 shadow-sm rounded-3 mt-4">
+    <div class="card-header bg-transparent border-0 pt-4 px-4">
+      <h5 class="fw-bold mb-0">Quick Templates</h5>
+    </div>
+    <div class="card-body p-4">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <button
+            class="btn btn-outline-primary w-100 text-start"
+            (click)="applyTemplate('weekdays')"
+          >
+            <i class="bi bi-calendar-week me-2"></i>
+            <div>
+              <strong>Weekdays Only</strong>
+              <small class="d-block text-muted">Mon-Fri, 9AM-5PM</small>
+            </div>
+          </button>
+        </div>
+        <div class="col-md-4">
+          <button
+            class="btn btn-outline-primary w-100 text-start"
+            (click)="applyTemplate('morning')"
+          >
+            <i class="bi bi-sunrise me-2"></i>
+            <div>
+              <strong>Morning Schedule</strong>
+              <small class="d-block text-muted">Mon-Sat, 6AM-12PM</small>
+            </div>
+          </button>
+        </div>
+        <div class="col-md-4">
+          <button
+            class="btn btn-outline-primary w-100 text-start"
+            (click)="applyTemplate('evening')"
+          >
+            <i class="bi bi-sunset me-2"></i>
+            <div>
+              <strong>Evening Schedule</strong>
+              <small class="d-block text-muted">Mon-Fri, 4PM-9PM</small>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Time Off Modal -->
+@if (showTimeOffModal()) {
+  <div
+    class="modal fade show d-block"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="timeOffModalTitle"
+    (keydown.escape)="showTimeOffModal.set(false)"
+    style="background: rgba(0, 0, 0, 0.5)"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="timeOffModalTitle">Add Time Off</h5>
+          <button
+            type="button"
+            class="btn-close"
+            (click)="showTimeOffModal.set(false)"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="timeOffStartDate" class="form-label">Start Date</label>
+            <input
+              type="date"
+              id="timeOffStartDate"
+              class="form-control"
+              [(ngModel)]="newTimeOff().startDate"
+              (ngModelChange)="newTimeOff.update(v => ({...v, startDate: $event}))"
+            />
+          </div>
+          <div class="mb-3">
+            <label for="timeOffEndDate" class="form-label">End Date</label>
+            <input
+              type="date"
+              id="timeOffEndDate"
+              class="form-control"
+              [(ngModel)]="newTimeOff().endDate"
+              (ngModelChange)="newTimeOff.update(v => ({...v, endDate: $event}))"
+            />
+          </div>
+          <div class="mb-3">
+            <label for="timeOffReason" class="form-label">Reason (Optional)</label>
+            <input
+              type="text"
+              id="timeOffReason"
+              class="form-control"
+              [(ngModel)]="newTimeOff().reason"
+              (ngModelChange)="newTimeOff.update(v => ({...v, reason: $event}))"
+              placeholder="e.g., Vacation, Conference"
+            />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="showTimeOffModal.set(false)">
+            Cancel
+          </button>
+          <button type="button" class="btn btn-primary" (click)="confirmAddTimeOff()">Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

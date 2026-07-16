@@ -1,0 +1,14 @@
+{
+  "name": "healthcare-appointment-system-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install && npm install --prefix backend && npm install --prefix frontend",
+    "start": "concurrently \"cd backend && npm run dev\" \"cd frontend && npm start\"",
+    "contracts:sync": "node scripts/sync-contracts.js",
+    "contracts:check": "npm run contracts:sync && git diff --exit-code -- backend/src/contracts/generated-contracts.ts frontend/src/app/core/contracts/generated-contracts.ts"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

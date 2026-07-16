@@ -1,0 +1,42 @@
+name: ❓ Question / Support
+description: Ask a question or seek support — only if you cannot find the answer in the docs
+title: "[QUESTION] "
+labels: ["question", "help wanted"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        > **Before opening this issue**, please check the [project documentation](../../docs/) and existing issues — your question may already be answered.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: Ask your question here. Be as specific as possible.
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What are you trying to achieve? What have you already tried?
+    validations:
+      required: true
+
+  - type: textarea
+    id: code
+    attributes:
+      label: Code Snippets
+      description: If applicable, provide code snippets associated with your question.
+      render: typescript
+    validations:
+      required: false
+
+  - type: textarea
+    id: related
+    attributes:
+      label: Related Issues / Discussions
+      description: Have you seen similar discussions? Link them here.
+    validations:
+      required: false

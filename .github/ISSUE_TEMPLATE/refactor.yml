@@ -1,0 +1,86 @@
+name: ♻️ Code Refactor / Tech Debt
+description: Propose a code refactoring or technical debt cleanup
+title: "[REFACTOR] "
+labels: ["refactor", "maintenance"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template to propose refactoring work or technical debt cleanup. Please be specific about the area of code and the expected outcome.
+
+  - type: input
+    id: location
+    attributes:
+      label: File / Module / Area
+      description: Where is the code that needs improvement?
+      placeholder: "e.g. backend/src/services/appointment.service.ts"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: reason
+    attributes:
+      label: Reason for Refactor
+      description: Why does this code need improvement?
+      options:
+        - Hard to understand / poor readability
+        - Duplicated logic (DRY violation)
+        - Performance issue
+        - Security concern
+        - Outdated dependency or pattern
+        - Violates project conventions
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description of the Problem
+      description: Describe the area of code and why it is problematic.
+    validations:
+      required: true
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What is the desired outcome of this refactoring?
+    validations:
+      required: true
+
+  - type: textarea
+    id: changes
+    attributes:
+      label: Proposed Changes
+      description: Describe the changes you intend to make.
+      placeholder: |
+        - [ ] Extract X into a shared utility
+        - [ ] Replace Y pattern with Z
+        - [ ] Update dependency W
+    validations:
+      required: false
+
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risks & Impact
+      description: What could break? Which parts of the application does this touch?
+    validations:
+      required: false
+
+  - type: textarea
+    id: testing
+    attributes:
+      label: Testing Strategy
+      description: How will you verify the refactoring didn't break anything?
+      placeholder: "e.g. existing integration tests cover this path; add unit tests for extracted utility"
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+    validations:
+      required: false

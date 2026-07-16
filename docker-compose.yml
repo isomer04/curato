@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.4
+    container_name: healthcare_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?DB_ROOT_PASSWORD must be set in .env}
+      MYSQL_DATABASE: ${DB_NAME:-healthcare_db}
+      MYSQL_USER: ${DB_USER:-db_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set in .env}
+    ports:
+      - "127.0.0.1:3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  api:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: healthcare_backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - ./backend/.env.docker
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      # Overriding DB fields just to be thoroughly sure it matches what the container brings up.
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_NAME=healthcare_db
+      - DB_USER=db_user
+      - DB_PASSWORD=db_password
+      - DB_DIALECT=mysql
+
+volumes:
+  mysql_data:
+    name: healthcare_mysql_data

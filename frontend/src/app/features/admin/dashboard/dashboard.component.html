@@ -1,0 +1,217 @@
+<!--
+  Admin Dashboard Template
+  
+  Layout:
+  - Welcome banner with admin branding
+  - System statistics cards
+  - Two-column layout: Quick actions + System overview
+-->
+
+<div class="container py-4">
+  <!-- Welcome Banner -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card welcome-card text-white rounded-4 border-0">
+        <div class="card-body p-4">
+          <div class="row align-items-center">
+            <div class="col-lg-8">
+              <h2 class="fw-bold mb-2">Admin Dashboard 🔐</h2>
+              <p class="mb-3 opacity-75">
+                Welcome, {{ authService.currentUser()?.firstName }}! Manage users, appointments, and
+                system settings.
+              </p>
+            </div>
+            <div class="col-lg-4 text-center d-none d-lg-block">
+              <i class="bi bi-shield-check display-1 opacity-50"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="row">
+      <div class="col-12 text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading dashboard...</span>
+        </div>
+      </div>
+    </div>
+  } @else if (hasError()) {
+    <!-- Error State -->
+    <div class="row">
+      <div class="col-12 text-center py-5">
+        <i class="bi bi-exclamation-triangle display-4 text-danger"></i>
+        <p class="text-muted mt-3">Failed to load dashboard statistics.</p>
+        <button class="btn btn-primary" (click)="retryLoad()">
+          <i class="bi bi-arrow-clockwise me-2"></i>Try Again
+        </button>
+      </div>
+    </div>
+  } @else {
+    <!-- Statistics Cards -->
+    <div class="row mb-4 g-4">
+      <!-- Total Users -->
+      <div class="col-6 col-md-3">
+        <div class="card h-100 border-0 shadow-sm rounded-3 stat-card">
+          <div class="card-body d-flex align-items-center">
+            <div class="icon-box bg-primary-subtle text-primary rounded-3 p-3 me-3">
+              <i class="bi bi-people fs-4"></i>
+            </div>
+            <div>
+              <h3 class="fw-bold mb-0">{{ stats().totalUsers }}</h3>
+              <small class="text-muted">Total Users</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total Doctors -->
+      <div class="col-6 col-md-3">
+        <div class="card h-100 border-0 shadow-sm rounded-3 stat-card">
+          <div class="card-body d-flex align-items-center">
+            <div class="icon-box bg-success-subtle text-success rounded-3 p-3 me-3">
+              <i class="bi bi-person-badge fs-4"></i>
+            </div>
+            <div>
+              <h3 class="fw-bold mb-0">{{ stats().totalDoctors }}</h3>
+              <small class="text-muted">Doctors</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total Patients -->
+      <div class="col-6 col-md-3">
+        <div class="card h-100 border-0 shadow-sm rounded-3 stat-card">
+          <div class="card-body d-flex align-items-center">
+            <div class="icon-box bg-info-subtle text-info rounded-3 p-3 me-3">
+              <i class="bi bi-person-heart fs-4"></i>
+            </div>
+            <div>
+              <h3 class="fw-bold mb-0">{{ stats().totalPatients }}</h3>
+              <small class="text-muted">Patients</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total Appointments -->
+      <div class="col-6 col-md-3">
+        <div class="card h-100 border-0 shadow-sm rounded-3 stat-card">
+          <div class="card-body d-flex align-items-center">
+            <div class="icon-box bg-warning-subtle text-warning rounded-3 p-3 me-3">
+              <i class="bi bi-calendar-check fs-4"></i>
+            </div>
+            <div>
+              <h3 class="fw-bold mb-0">{{ stats().totalAppointments }}</h3>
+              <small class="text-muted">Appointments</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions & System Overview -->
+    <div class="row g-4">
+      <!-- Quick Actions Panel -->
+      <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-3 h-100">
+          <div class="card-header bg-transparent border-0 pt-4 px-4">
+            <h5 class="fw-bold mb-0">Quick Actions</h5>
+          </div>
+          <div class="card-body p-4">
+            <div class="d-grid gap-3">
+              @for (action of quickActions; track action.route) {
+                <a
+                  [routerLink]="action.route"
+                  class="btn btn-outline-primary text-start quick-action-btn"
+                >
+                  <i class="bi me-2" [class]="action.icon"></i>
+                  {{ action.label }}
+                </a>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- System Overview Panel -->
+      <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-3">
+          <div class="card-header bg-transparent border-0 pt-4 px-4">
+            <h5 class="fw-bold mb-0">System Overview</h5>
+          </div>
+          <div class="card-body p-4">
+            <div class="row g-4">
+              <!-- Appointments Today -->
+              <div class="col-md-6">
+                <div class="p-4 bg-light rounded-3">
+                  <h6 class="text-muted mb-3">Appointments Today</h6>
+                  <div class="d-flex justify-content-between mb-2">
+                    <span>Scheduled</span>
+                    <span class="badge bg-warning-subtle text-warning">{{
+                      appointmentBreakdown().scheduled
+                    }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between mb-2">
+                    <span>Confirmed</span>
+                    <span class="badge bg-primary-subtle text-primary">{{
+                      appointmentBreakdown().confirmed
+                    }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between mb-2">
+                    <span>Completed</span>
+                    <span class="badge bg-success-subtle text-success">{{
+                      appointmentBreakdown().completed
+                    }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <span>Cancelled</span>
+                    <span class="badge bg-danger-subtle text-danger">{{
+                      appointmentBreakdown().cancelled
+                    }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- User Statistics -->
+              <div class="col-md-6">
+                <div class="p-4 bg-light rounded-3">
+                  <h6 class="text-muted mb-3">User Statistics</h6>
+                  <div class="d-flex justify-content-between mb-2">
+                    <span>Active Users</span>
+                    <span class="badge bg-success-subtle text-success">{{
+                      userStats().activeUsers
+                    }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between mb-2">
+                    <span>New This Week</span>
+                    <span class="badge bg-primary-subtle text-primary">{{
+                      userStats().newThisWeek
+                    }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between mb-2">
+                    <span>Pending Verification</span>
+                    <span class="badge bg-warning-subtle text-warning">{{
+                      userStats().pendingVerification
+                    }}</span>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <span>Inactive</span>
+                    <span class="badge bg-secondary-subtle text-secondary">{{
+                      userStats().inactive
+                    }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+  <!-- end @else -->
+</div>

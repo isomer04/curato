@@ -1,0 +1,62 @@
+name: Reset Demo Data
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: "Type RESET to confirm wiping and re-seeding all demo data"
+        required: true
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  reset-demo:
+    name: Reset Demo Data (Lightsail)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Validate confirmation input
+        run: |
+          if [ "${{ github.event.inputs.confirm }}" != "RESET" ]; then
+            echo "::error::You must type RESET in the confirm field to proceed."
+            exit 1
+          fi
+
+      - name: Validate required deployment secrets
+        env:
+          LIGHTSAIL_HOST: ${{ secrets.LIGHTSAIL_HOST }}
+          LIGHTSAIL_USER: ${{ secrets.LIGHTSAIL_USER }}
+          LIGHTSAIL_SSH_KEY: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          missing=0
+          for key in LIGHTSAIL_HOST LIGHTSAIL_USER LIGHTSAIL_SSH_KEY; do
+            if [ -z "${!key}" ]; then
+              echo "::error::Missing required secret: $key"
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            exit 1
+          fi
+
+      - name: Reset demo data over SSH
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.LIGHTSAIL_HOST }}
+          username: ${{ secrets.LIGHTSAIL_USER }}
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          port: ${{ secrets.LIGHTSAIL_SSH_PORT || '22' }}
+          command_timeout: 10m
+          script: |
+            set -euo pipefail
+
+            REPO_DIR="/home/ubuntu/Healthcare-Appointment-System"
+            cd "$REPO_DIR/backend"
+
+            echo "[reset-demo] Running demo-seed:reset on $(hostname) at $(date -u)"
+            npm run demo-seed:reset
+            echo "[reset-demo] Completed successfully."
